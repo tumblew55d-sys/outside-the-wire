@@ -1,0 +1,137 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'theme/tactical_theme.dart';
+import 'screens/bio_screen.dart';
+void main() {
+  runApp(const PatrolApp());
+}
+
+class PatrolApp extends StatelessWidget {
+  const PatrolApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'PATROL: Character Generator',
+      theme: TacticalTheme.themeData,
+      home: const MainNavigationShell(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class MainNavigationShell extends StatefulWidget {
+  const MainNavigationShell({super.key});
+
+  @override
+  State<MainNavigationShell> createState() => _MainNavigationShellState();
+}
+
+class _MainNavigationShellState extends State<MainNavigationShell> {
+  int _selectedIndex = 0; // 0: Roster, 1: Inventory, 2: Deployments
+
+  @override
+  Widget build(BuildContext context) {
+    // Check screen width for Responsive Layout
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
+    return Scaffold(
+      // AppBar is only for Mobile to hold the "Hamburger" menu
+      appBar: isWideScreen
+          ? null
+          : AppBar(
+              backgroundColor: TacticalTheme.gunmetal,
+              title: Text("UNIT ROSTER", style: TacticalTheme.headerStencil),
+              centerTitle: true,
+              leading: Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu, color: TacticalTheme.desertTan),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
+            ),
+      body: Row(
+        children: [
+          // SIDEBAR (Only visible on Tablet/Web)
+          if (isWideScreen)
+            Container(
+              width: 250,
+              color: Colors.black, // darker side rail
+              child: _buildNavMenu(isMobile: false),
+            ),
+          
+          // MAIN CONTENT AREA
+          Expanded(
+            child: Container(
+              color: TacticalTheme.gunmetal,
+              child: Center(
+                child: _buildCurrentScreen(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      // DRAWER (Only accessible on Mobile)
+      drawer: isWideScreen ? null : Drawer(
+        backgroundColor: Colors.black,
+        child: _buildNavMenu(isMobile: true),
+      ),
+    );
+  }
+
+  // The Content Switcher
+  Widget _buildCurrentScreen() {
+    switch (_selectedIndex) {
+      case 0:
+        return const Text("SCREEN A: ROSTER (Coming Soon)", style: TextStyle(color: Colors.white));
+      case 1:
+        return const BioScreen(); //
+      case 2:
+        return const Text("SCREEN E: QUARTERMASTER (Coming Soon)", style: TextStyle(color: Colors.white));
+      default:
+        return const Text("ERROR", style: TextStyle(color: Colors.red));
+    }
+  }
+
+  // The Navigation Menu (Reused for Drawer and Sidebar)
+  Widget _buildNavMenu({required bool isMobile}) {
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        if (isMobile) 
+          DrawerHeader(
+            decoration: const BoxDecoration(color: TacticalTheme.oliveDrab),
+            child: Center(child: Text("PATROL COMMAND", style: TacticalTheme.headerStencil)),
+          ),
+        if (!isMobile) const SizedBox(height: 40), // Spacing for desktop
+
+        _navTile(0, "PERSONNEL ROSTER", Icons.folder_shared),
+        _navTile(1, "NEW ENLISTMENT", Icons.add_circle_outline),
+        const Divider(color: TacticalTheme.desertTan),
+        _navTile(2, "LOGISTICS / INV", Icons.backpack),
+        _navTile(3, "DEPLOYMENT LOG", Icons.map),
+      ],
+    );
+  }
+
+  Widget _navTile(int index, String title, IconData icon) {
+    final isSelected = _selectedIndex == index;
+    return ListTile(
+      tileColor: isSelected ? TacticalTheme.rangerGreen : null,
+      leading: Icon(icon, color: isSelected ? TacticalTheme.safetyOrange : TacticalTheme.desertTan),
+      title: Text(
+        title,
+        style: TacticalTheme.dataMono.copyWith(
+          color: isSelected ? Colors.white : TacticalTheme.desertTan,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      onTap: () {
+        setState(() => _selectedIndex = index);
+        if (Scaffold.of(context).hasDrawer && Scaffold.of(context).isDrawerOpen) {
+          Navigator.pop(context); // Close drawer on mobile selection
+        }
+      },
+    );
+  }
+}
