@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="900" height="1100" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#efe9dd" />
+  <text x="40" y="60" font-size="22" font-family="Arial" fill="#222">Screen E — Abilities & Narrative</text>
+  <rect x="40" y="90" width="820" height="900" fill="#fffdfa" stroke="#d3c9b4"/>
+  <text x="80" y="140" font-size="14" font-family="Arial" fill="#333">Computed Abilities (12) — live recalculation</text>
+  <rect x="80" y="160" width="720" height="260" fill="#f6f3ee" stroke="#d0c6b1"/>
+  <text x="80" y="440" font-size="14" font-family="Arial" fill="#333">Narrative (800 chars) — user edit or AI generate</text>
+  <rect x="80" y="460" width="720" height="260" fill="#fff" stroke="#cfc6b2"/>
+  <text x="80" y="740" font-size="12" font-family="Arial" fill="#666">AI Generate button — creates draft based on screens A-C</text>
+</svg>

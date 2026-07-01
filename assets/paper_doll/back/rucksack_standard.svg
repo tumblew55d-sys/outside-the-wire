@@ -1,0 +1,67 @@
+<!-- ALICE Rucksack (Large) -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (transparent) -->
+  
+  <!-- Main pack body -->
+  <g id="rucksack" fill="#4A5D3E" stroke="#2B2B2B" stroke-width="4">
+    <!-- Main compartment -->
+    <rect x="186" y="100" width="140" height="280" rx="8"/>
+    
+    <!-- Top flap -->
+    <ellipse cx="256" cy="105" rx="75" ry="25" fill="#353F2D"/>
+  </g>
+  
+  <!-- External frame -->
+  <g id="frame" stroke="#2B2B2B" stroke-width="5" fill="none">
+    <!-- Side bars -->
+    <line x1="180" y1="90" x2="180" y2="390"/>
+    <line x1="332" y1="90" x2="332" y2="390"/>
+    
+    <!-- Top bar -->
+    <line x1="180" y1="90" x2="332" y2="90"/>
+    
+    <!-- Bottom bar -->
+    <line x1="180" y1="390" x2="332" y2="390"/>
+  </g>
+  
+  <!-- Shoulder straps -->
+  <g id="straps" fill="#3C4D32" stroke="#2B2B2B" stroke-width="2">
+    <rect x="200" y="80" width="25" height="60" rx="4"/>
+    <rect x="287" y="80" width="25" height="60" rx="4"/>
+  </g>
+  
+  <!-- External pouches -->
+  <g id="pouches" fill="#3C4D32" stroke="#2B2B2B" stroke-width="2">
+    <!-- Side pocket (left) -->
+    <rect x="165" y="200" width="25" height="60" rx="3"/>
+    <!-- Side pocket (right) -->
+    <rect x="322" y="200" width="25" height="60" rx="3"/>
+    <!-- Bottom pocket -->
+    <rect x="206" y="360" width="100" height="35" rx="3"/>
+  </g>
+  
+  <!-- Compression straps -->
+  <g id="compression" stroke="#2B2B2B" stroke-width="2" fill="none">
+    <line x1="186" y1="180" x2="326" y2="180"/>
+    <line x1="186" y1="260" x2="326" y2="260"/>
+    <line x1="186" y1="340" x2="326" y2="340"/>
+  </g>
+  
+  <!-- Buckles -->
+  <g id="buckles" fill="#6B6B6B">
+    <rect x="182" y="176" width="8" height="8" rx="1"/>
+    <rect x="322" y="176" width="8" height="8" rx="1"/>
+    <rect x="182" y="256" width="8" height="8" rx="1"/>
+    <rect x="322" y="256" width="8" height="8" rx="1"/>
+  </g>
+  
+  <!-- Canvas texture -->
+  <g id="texture" fill="#353F2D" opacity="0.2">
+    <circle cx="220" cy="150" r="1"/>
+    <circle cx="240" cy="160" r="1"/>
+    <circle cx="270" cy="155" r="1"/>
+    <circle cx="290" cy="165" r="1"/>
+    <circle cx="230" cy="220" r="1"/>
+    <circle cx="280" cy="230" r="1"/>
+  </g>
+</svg>

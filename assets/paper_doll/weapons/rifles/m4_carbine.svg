@@ -1,0 +1,51 @@
+<!-- M4 Carbine -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (transparent) -->
+  
+  <!-- Rotate entire rifle group for diagonal placement -->
+  <g transform="rotate(-30 256 256)">
+    <!-- Main rifle body -->
+    <g id="rifle" fill="#2B2B2B" stroke="#1A1A1A" stroke-width="2">
+      <!-- Barrel -->
+      <rect x="180" y="240" width="180" height="12" rx="2"/>
+      
+      <!-- Handguard -->
+      <rect x="220" y="235" width="80" height="22" rx="3" fill="#9A7A50"/>
+      
+      <!-- Upper receiver -->
+      <rect x="295" y="238" width="60" height="16" rx="2"/>
+      
+      <!-- Magazine -->
+      <rect x="280" y="252" width="20" height="45" rx="2" fill="#2B2B2B"/>
+      
+      <!-- Stock -->
+      <rect x="355" y="242" width="50" height="10" rx="2"/>
+      <rect x="395" y="238" width="20" height="18" rx="3"/>
+      
+      <!-- Pistol grip -->
+      <path d="M 310 252 L 310 270 Q 310 280 300 280 L 295 280 L 295 252 Z" fill="#2B2B2B"/>
+    </g>
+    
+    <!-- Metal highlights -->
+    <g id="highlights" fill="#6B6B6B" opacity="0.7">
+      <rect x="185" y="242" width="160" height="2"/>
+      <rect x="300" y="240" width="50" height="2"/>
+    </g>
+    
+    <!-- Sling -->
+    <g id="sling" stroke="#4A5D3E" stroke-width="3" fill="none">
+      <path d="M 240 235 Q 235 215 250 200"/>
+      <path d="M 350 245 Q 360 230 375 225"/>
+    </g>
+    
+    <!-- Details -->
+    <g id="details" fill="#6B6B6B">
+      <!-- Front sight -->
+      <rect x="175" y="238" width="3" height="16"/>
+      <!-- Rear sight -->
+      <rect x="340" y="238" width="3" height="16"/>
+      <!-- Charging handle -->
+      <rect x="350" y="238" width="8" height="4"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "203732910394",
+    "project_id": "patrol-character-generator",
+    "storage_bucket": "patrol-character-generator.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:203732910394:android:1bd6e9e17581656554d003",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_4patrol"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBx3tBiL-XgM14DcHfNdM6azTTRU5MrqC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

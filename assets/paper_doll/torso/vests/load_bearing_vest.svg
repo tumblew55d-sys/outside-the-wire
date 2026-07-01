@@ -1,0 +1,55 @@
+<!-- ALICE Load Bearing Vest -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (transparent) -->
+  
+  <!-- Vest main body -->
+  <g id="vest" fill="#B8956A" stroke="#2B2B2B" stroke-width="3">
+    <!-- Main vest shape -->
+    <rect x="186" y="140" width="140" height="180" rx="4"/>
+    
+    <!-- Shoulder straps -->
+    <rect x="200" y="120" width="30" height="40" rx="3" fill="#4A5D3E"/>
+    <rect x="282" y="120" width="30" height="40" rx="3" fill="#4A5D3E"/>
+  </g>
+  
+  <!-- Pouches (6 total) -->
+  <g id="pouches" fill="#9A7A50" stroke="#2B2B2B" stroke-width="2">
+    <!-- Top row -->
+    <rect x="195" y="155" width="35" height="50" rx="2"/>
+    <rect x="238" y="155" width="35" height="50" rx="2"/>
+    <rect x="281" y="155" width="35" height="50" rx="2"/>
+    
+    <!-- Bottom row -->
+    <rect x="195" y="220" width="35" height="50" rx="2"/>
+    <rect x="238" y="220" width="35" height="50" rx="2"/>
+    <rect x="281" y="220" width="35" height="50" rx="2"/>
+  </g>
+  
+  <!-- Webbing straps -->
+  <g id="webbing" stroke="#4A5D3E" stroke-width="2" fill="none">
+    <!-- Horizontal straps -->
+    <line x1="186" y1="210" x2="326" y2="210"/>
+    <line x1="186" y1="275" x2="326" y2="275"/>
+    
+    <!-- Vertical straps -->
+    <line x1="230" y1="140" x2="230" y2="320"/>
+    <line x1="282" y1="140" x2="282" y2="320"/>
+  </g>
+  
+  <!-- Buckles -->
+  <g id="buckles" fill="#6B6B6B">
+    <rect x="224" y="206" width="8" height="8" rx="1"/>
+    <rect x="280" y="206" width="8" height="8" rx="1"/>
+    <rect x="224" y="271" width="8" height="8" rx="1"/>
+    <rect x="280" y="271" width="8" height="8" rx="1"/>
+  </g>
+  
+  <!-- Canvas texture -->
+  <g id="texture" fill="#2B2B2B" opacity="0.1">
+    <circle cx="210" cy="170" r="1"/>
+    <circle cx="220" cy="175" r="1"/>
+    <circle cx="250" cy="165" r="1"/>
+    <circle cx="290" cy="180" r="1"/>
+    <circle cx="300" cy="170" r="1"/>
+  </g>
+</svg>

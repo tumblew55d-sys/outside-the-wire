@@ -1,0 +1,36 @@
+{
+    "name": "Outside the Wire Character Generator",
+    "short_name": "OTW CharGen",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#4A5D3E",
+    "theme_color": "#4A5D3E",
+    "description": "Create detailed military characters for tabletop RPGs with deployments, specialties, and equipment.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "categories": ["games", "productivity", "entertainment"],
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

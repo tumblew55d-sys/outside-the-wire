@@ -1,0 +1,19 @@
+# Firebase Hosting
+build/web/
+.firebase/
+.firebaserc
+
+# Android Release Keys
+*.jks
+*.keystore
+android/key.properties
+android/app/google-services.json
+
+# iOS Provisioning
+*.mobileprovision
+*.p12
+
+# Sensitive Files
+.env
+.env.local
+secrets.yaml

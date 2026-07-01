@@ -1,0 +1,30 @@
+<!-- Simple Base Figure Silhouette -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (transparent) -->
+  
+  <!-- Base figure - simplified military stance -->
+  <g id="figure" fill="#D4A574" stroke="#2B2B2B" stroke-width="3">
+    <!-- Head -->
+    <circle cx="256" cy="100" r="40"/>
+    
+    <!-- Neck -->
+    <rect x="244" y="135" width="24" height="20"/>
+    
+    <!-- Torso -->
+    <rect x="196" y="155" width="120" height="180" rx="8"/>
+    
+    <!-- Arms -->
+    <rect x="156" y="160" width="40" height="160" rx="12"/>
+    <rect x="316" y="160" width="40" height="160" rx="12"/>
+    
+    <!-- Legs -->
+    <rect x="206" y="335" width="45" height="150" rx="12"/>
+    <rect x="261" y="335" width="45" height="150" rx="12"/>
+  </g>
+  
+  <!-- Shadow detail -->
+  <g id="shadows" fill="#B88D5F" opacity="0.5">
+    <ellipse cx="240" cy="180" rx="15" ry="30"/>
+    <ellipse cx="272" cy="180" rx="15" ry="30"/>
+  </g>
+</svg>

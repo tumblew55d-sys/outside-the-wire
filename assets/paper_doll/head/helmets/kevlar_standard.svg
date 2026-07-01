@@ -1,0 +1,35 @@
+<!-- PASGT Kevlar Helmet -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (transparent) -->
+  
+  <!-- Helmet main shape -->
+  <g id="helmet" fill="#4A5D3E" stroke="#2B2B2B" stroke-width="4">
+    <!-- Main helmet dome -->
+    <ellipse cx="256" cy="90" rx="80" ry="60"/>
+    <path d="M 176 90 Q 176 140 200 150 L 312 150 Q 336 140 336 90" fill="#4A5D3E"/>
+    
+    <!-- Brim/edge -->
+    <ellipse cx="256" cy="150" rx="90" ry="15" fill="#353F2D"/>
+  </g>
+  
+  <!-- Highlight -->
+  <g id="highlight" fill="#5C7049" opacity="0.6">
+    <ellipse cx="230" cy="75" rx="25" ry="20"/>
+  </g>
+  
+  <!-- Chin strap -->
+  <g id="strap" stroke="#2B2B2B" stroke-width="3" fill="none">
+    <path d="M 200 145 Q 210 170 240 175"/>
+    <path d="M 312 145 Q 302 170 272 175"/>
+  </g>
+  
+  <!-- Canvas texture effect (dots) -->
+  <g id="texture" fill="#353F2D" opacity="0.2">
+    <circle cx="240" cy="95" r="1"/>
+    <circle cx="250" cy="100" r="1"/>
+    <circle cx="260" cy="95" r="1"/>
+    <circle cx="270" cy="100" r="1"/>
+    <circle cx="245" cy="110" r="1"/>
+    <circle cx="265" cy="110" r="1"/>
+  </g>
+</svg>

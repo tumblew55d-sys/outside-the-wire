@@ -1,0 +1,31 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Character portraits: users can upload/view/delete their own character portraits
+    match /portraits/{characterImage} {
+      // Allow read if authenticated
+      allow read: if request.auth != null;
+      
+      // Allow write/delete only if user is authenticated
+      allow write, delete: if request.auth != null;
+    }
+    
+    // Equipment images: users can upload/view/delete their own character equipment images
+    match /equipment/{characterId}/{equipmentImage} {
+      allow read: if request.auth != null;
+      allow write, delete: if request.auth != null;
+    }
+    
+    // Character sheets (PDFs): users can upload/view/delete their own character sheets
+    match /character_sheets/{characterId}/{filename} {
+      allow read: if request.auth != null;
+      allow write, delete: if request.auth != null;
+    }
+    
+    // Deny all other requests by default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
