@@ -642,7 +642,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Opacity(
               opacity: 0.3,
               child: Image.asset(
-                'assets/images/landing_background.jpg',
+                'assets/images/background 2.jpg',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   // Fallback if image fails to load
