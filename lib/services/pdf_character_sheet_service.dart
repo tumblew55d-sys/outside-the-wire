@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../models/character.dart';
@@ -240,10 +241,10 @@ class PdfCharacterSheetService {
         character.name,
       );
       if (cloudUrl != null) {
-        print('Character sheet uploaded to Firebase: $cloudUrl');
+        debugPrint('Character sheet uploaded to Firebase: $cloudUrl');
       }
     } catch (e) {
-      print('Failed to upload character sheet: $e');
+      debugPrint('Failed to upload character sheet: $e');
     }
 
     // Save locally
@@ -512,8 +513,16 @@ class PdfCharacterSheetService {
 
   /// Build abilities section
   static pw.Widget _buildAbilitiesSection(Character character) {
-    final abilities =
-        character.enlistment['abilities'] as Map<String, dynamic>? ?? {};
+    // Try to get abilities from character data, calculate if missing
+    var abilities = character.enlistment['abilities'] as Map<String, dynamic>?;
+    
+    if (abilities == null || abilities.isEmpty) {
+      debugPrint('⚠️ Abilities missing from character data - calculating on-the-fly');
+      abilities = _calculateAbilities(character);
+    }
+    
+    // Ensure abilities is non-null for the widget tree
+    final nonNullAbilities = abilities ?? <String, dynamic>{};
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -522,27 +531,95 @@ class PdfCharacterSheetService {
           'Small Arms',
           'Heavy Weapons',
           'Fires',
-        ], abilities),
+        ], nonNullAbilities),
         pw.SizedBox(height: 8),
         _buildAbilityCategory('INSTINCT', [
           'First Aid',
           'Communication',
           'Civil Affairs',
-        ], abilities),
+        ], nonNullAbilities),
         pw.SizedBox(height: 8),
         _buildAbilityCategory('TACTICS', [
           'Spying',
           'Explosives',
           'Signals Intel',
-        ], abilities),
+        ], nonNullAbilities),
       ],
     );
   }
 
+  /// Calculate abilities on-the-fly if missing from character data
+  /// This is a fallback for older characters or edge cases
+  static Map<String, dynamic> _calculateAbilities(Character character) {
+    final a = character.attributes;
+    final s = character.skills;
+    
+    int val(Map<String, int> map, String key) => map[key] ?? 0;
+    int penalize(int base, bool earned) => earned ? base : (base ~/ 2);
+    
+    // Core abilities (never halved)
+    final specialty = character.enlistment['specialty']?.toString() ?? '';
+    var tacticsBase = val(a, 'Combat Knowledge') + val(s, 'Combat') + val(s, 'Training');
+    if (specialty.contains('Rifleman')) {
+      tacticsBase += 1;
+    }
+    
+    return {
+      'Prowess': val(a, 'Strength') + val(s, 'Combat') + val(s, 'Training'),
+      'Instincts': val(a, 'Combat Wisdom') + val(s, 'Training') + val(s, 'Combat'),
+      'Tactics': tacticsBase,
+      'Small Arms': penalize(
+        val(s, 'Small Arms') + val(a, 'Agility') + val(s, 'Combat'),
+        val(s, 'Small Arms') > 0,
+      ),
+      'Heavy Weapons': penalize(
+        val(s, 'Heavy Weapons') + val(a, 'Agility') + val(s, 'Combat'),
+        val(s, 'Heavy Weapons') > 0,
+      ),
+      'First Aid': penalize(
+        val(s, 'First Aid') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'First Aid') > 0,
+      ),
+      'Communication': penalize(
+        val(s, 'Radio Ops') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Radio Ops') > 0,
+      ),
+      'Civil Affairs': penalize(
+        val(s, 'Civil Affairs') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Civil Affairs') > 0,
+      ),
+      'Fires': penalize(
+        val(s, 'Fires') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Fires') > 0,
+      ),
+      'Spying': penalize(
+        val(s, 'Spying') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Spying') > 0,
+      ),
+      'Explosives': penalize(
+        val(s, 'Explosives') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Explosives') > 0,
+      ),
+      'Signals Intel': penalize(
+        val(s, 'Signals Intel') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Signals Intel') > 0,
+      ),
+    };
+  }
+
   /// Build LARGE prominent abilities section (Most Important)
   static pw.Widget _buildAbilitiesSectionLarge(Character character) {
-    final abilities =
-        character.enlistment['abilities'] as Map<String, dynamic>? ?? {};
+    // Try to get abilities from character data, calculate if missing
+    var abilities = character.enlistment['abilities'] as Map<String, dynamic>?;
+    
+    if (abilities == null || abilities.isEmpty) {
+      debugPrint('⚠️ Abilities missing from character data - calculating on-the-fly');
+      abilities = _calculateAbilities(character);
+    }
+    
+    // Ensure abilities is non-null for the widget tree
+    final nonNullAbilities = abilities ?? <String, dynamic>{};
+    
     final abilityGroups = {
       'Prowess': ['Small Arms', 'Heavy Weapons', 'First Aid'],
       'Instincts': ['Communication', 'Civil Affairs', 'Fires'],
@@ -570,7 +647,7 @@ class PdfCharacterSheetService {
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: abilityGroups.entries.map((group) {
-              final score = abilities[group.key] ?? 0;
+              final score = nonNullAbilities[group.key] ?? 0;
               return pw.Expanded(
                 child: pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(horizontal: 4),
@@ -586,7 +663,7 @@ class PdfCharacterSheetService {
                       ),
                       pw.SizedBox(height: 4),
                       ...group.value.map((skill) {
-                        final value = abilities[skill] ?? 0;
+                        final value = nonNullAbilities[skill] ?? 0;
                         return pw.Padding(
                           padding: const pw.EdgeInsets.only(top: 2),
                           child: pw.Text(

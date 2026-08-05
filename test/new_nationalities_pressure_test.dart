@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_4patrol/data/nationality_data.dart';
-import 'package:flutter_application_4patrol/models/character.dart';
 
 void main() {
   group('New Nationalities Pressure Test - Brazil, New Zealand, Panama', () {
@@ -306,7 +305,6 @@ void main() {
     // Test 14: Panama UN peacekeeping schools
     test('14. Panama has UN peacekeeping training courses', () {
       final schools = NationalityData.getSchools('Panama');
-      final sofSchools = NationalityData.getSOFSchools('Panama');
 
       expect(
         schools.any((s) => s.contains('UN Peacekeeping')),

@@ -22,7 +22,7 @@ class CharacterCreationLayout extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isWideScreen = screenWidth > 800;
 
-    print(
+    debugPrint(
       'CharacterCreationLayout: screenWidth=$screenWidth, isWideScreen=$isWideScreen, showPreview=$showPreview',
     );
 

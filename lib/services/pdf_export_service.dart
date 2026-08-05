@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../models/character.dart';
@@ -8,6 +9,65 @@ import 'pdf_export_service_io.dart'
     if (dart.library.html) 'pdf_export_service_web.dart';
 
 class PdfExportService {
+  /// Calculate abilities on-the-fly if missing from character data
+  /// This is a fallback for older characters or edge cases
+  static Map<String, dynamic> _calculateAbilities(Character character) {
+    final a = character.attributes;
+    final s = character.skills;
+    
+    int val(Map<String, int> map, String key) => map[key] ?? 0;
+    int penalize(int base, bool earned) => earned ? base : (base ~/ 2);
+    
+    // Core abilities (never halved)
+    final specialty = character.enlistment['specialty']?.toString() ?? '';
+    var tacticsBase = val(a, 'Combat Knowledge') + val(s, 'Combat') + val(s, 'Training');
+    if (specialty.contains('Rifleman')) {
+      tacticsBase += 1;
+    }
+    
+    return {
+      'Prowess': val(a, 'Strength') + val(s, 'Combat') + val(s, 'Training'),
+      'Instincts': val(a, 'Combat Wisdom') + val(s, 'Training') + val(s, 'Combat'),
+      'Tactics': tacticsBase,
+      'Small Arms': penalize(
+        val(s, 'Small Arms') + val(a, 'Agility') + val(s, 'Combat'),
+        val(s, 'Small Arms') > 0,
+      ),
+      'Heavy Weapons': penalize(
+        val(s, 'Heavy Weapons') + val(a, 'Agility') + val(s, 'Combat'),
+        val(s, 'Heavy Weapons') > 0,
+      ),
+      'First Aid': penalize(
+        val(s, 'First Aid') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'First Aid') > 0,
+      ),
+      'Communication': penalize(
+        val(s, 'Radio Ops') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Radio Ops') > 0,
+      ),
+      'Civil Affairs': penalize(
+        val(s, 'Civil Affairs') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Civil Affairs') > 0,
+      ),
+      'Fires': penalize(
+        val(s, 'Fires') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Fires') > 0,
+      ),
+      'Spying': penalize(
+        val(s, 'Spying') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Spying') > 0,
+      ),
+      'Explosives': penalize(
+        val(s, 'Explosives') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Explosives') > 0,
+      ),
+      'Signals Intel': penalize(
+        val(s, 'Signals Intel') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
+        val(s, 'Signals Intel') > 0,
+      ),
+    };
+  }
+
   static Future<String> exportCharacterToPdf(Character character) async {
     final pdf = pw.Document();
 
@@ -116,21 +176,29 @@ class PdfExportService {
           pw.SizedBox(height: 16),
 
           // Abilities Section (must come before narrative for proper display)
-          if (character.enlistment['abilities'] != null) ...[
-            _buildSection('ABILITIES', [
+          () {
+            // Try to get abilities from character data, calculate if missing
+            var abilities = character.enlistment['abilities'] as Map<String, dynamic>?;
+            
+            if (abilities == null || abilities.isEmpty) {
+              debugPrint('⚠️ Abilities missing from character data - calculating on-the-fly');
+              abilities = _calculateAbilities(character);
+            }
+            
+            return _buildSection('ABILITIES', [
               pw.Wrap(
                 spacing: 16,
                 runSpacing: 8,
-                children: (character.enlistment['abilities'] as Map).entries.map((e) =>
+                children: abilities.entries.map((e) =>
                   pw.Container(
                     width: 120,
                     child: _buildStatRow(e.key.toString(), e.value as int),
                   )
                 ).toList(),
               ),
-            ]),
-            pw.SizedBox(height: 16),
-          ],
+            ]);
+          }(),
+          pw.SizedBox(height: 16),
 
           // Narrative Section (if exists)
           if (character.enlistment['narrative'] != null && 
@@ -245,10 +313,10 @@ class PdfExportService {
         character.name,
       );
       if (cloudUrl != null) {
-        print('PDF uploaded to Firebase Storage: $cloudUrl');
+        debugPrint('PDF uploaded to Firebase Storage: $cloudUrl');
       }
     } catch (e) {
-      print('Failed to upload PDF to Storage: $e');
+      debugPrint('Failed to upload PDF to Storage: $e');
     }
 
     // Use platform-specific file handler for local save

@@ -53,15 +53,15 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _syncFirebaseCharacters() async {
     try {
-      print('=== Starting Firebase Sync ===');
+      debugPrint('=== Starting Firebase Sync ===');
       final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
-      print('Current User ID: $currentUserId');
+      debugPrint('Current User ID: $currentUserId');
 
       final firebaseCharacters = await FirebaseService.fetchAllUserCharacters();
-      print('Found ${firebaseCharacters.length} characters in Firebase');
+      debugPrint('Found ${firebaseCharacters.length} characters in Firebase');
 
       if (firebaseCharacters.isEmpty) {
-        print('No characters to sync from Firebase');
+        debugPrint('No characters to sync from Firebase');
         return;
       }
 
@@ -76,10 +76,10 @@ class _AuthScreenState extends State<AuthScreen> {
             final updatedData = Map<String, dynamic>.from(localData);
             updatedData['userId'] = currentUserId;
             await box.put(key, updatedData);
-            print('Migrated local character $key to add userId');
+            debugPrint('Migrated local character $key to add userId');
           }
         } catch (e) {
-          print('Error migrating local character $key: $e');
+          debugPrint('Error migrating local character $key: $e');
         }
       }
 
@@ -100,13 +100,13 @@ class _AuthScreenState extends State<AuthScreen> {
             final firebaseName = charData['name'] ?? '';
             final localName = existingData['name'] ?? '';
 
-            print('Character $charId exists both locally and in Firebase');
-            print('  Firebase name: "$firebaseName"');
-            print('  Local name: "$localName"');
+            debugPrint('Character $charId exists both locally and in Firebase');
+            debugPrint('  Firebase name: "$firebaseName"');
+            debugPrint('  Local name: "$localName"');
 
             // If Firebase version is essentially empty, keep local version
             if (firebaseName.isEmpty && localName.isNotEmpty) {
-              print('  → Keeping local version (Firebase version is empty)');
+              debugPrint('  → Keeping local version (Firebase version is empty)');
               // Update local version with userId and push to Firebase
               final updatedLocal = Map<String, dynamic>.from(existingData);
               updatedLocal['userId'] = currentUserId;
@@ -116,9 +116,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   charId,
                   updatedLocal,
                 );
-                print('  → Pushed complete local data to Firebase');
+                debugPrint('  → Pushed complete local data to Firebase');
               } catch (e) {
-                print('  → Error pushing to Firebase: $e');
+                debugPrint('  → Error pushing to Firebase: $e');
               }
               continue;
             }
@@ -126,20 +126,20 @@ class _AuthScreenState extends State<AuthScreen> {
 
           // Either no local version, or Firebase version has data - use Firebase version
           await box.put(charId, charData);
-          print(
+          debugPrint(
             'Synced character ${charData['name']} (ID: $charId) from Firebase to Hive',
           );
-          print('  - Name: ${charData['name']}');
-          print('  - Nationality: ${charData['nationality']}');
-          print('  - Age: ${charData['age']}');
-          print('  - Service: ${charData['enlistment']?['service']}');
+          debugPrint('  - Name: ${charData['name']}');
+          debugPrint('  - Nationality: ${charData['nationality']}');
+          debugPrint('  - Age: ${charData['age']}');
+          debugPrint('  - Service: ${charData['enlistment']?['service']}');
         }
       }
-      print(
+      debugPrint(
         'Successfully synced ${firebaseCharacters.length} characters from Firebase',
       );
     } catch (e) {
-      print('Error syncing Firebase characters: $e');
+      debugPrint('Error syncing Firebase characters: $e');
     }
   }
 

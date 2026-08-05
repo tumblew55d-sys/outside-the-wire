@@ -291,6 +291,9 @@ class _FinalReviewScreenState extends State<FinalReviewScreen> {
                                 debugPrint(
                                   'Custom Weapons: ${latestCharacter.inventory['customWeapons']}',
                                 );
+                                debugPrint(
+                                  'Abilities: ${latestCharacter.enlistment['abilities']}',
+                                );
 
                                 final path =
                                     await PdfCharacterSheetService.exportCharacterSheet(

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:io';
-import '../lib/models/character.dart';
-import '../lib/services/pdf_character_sheet_service.dart';
+import 'package:flutter_application_4patrol/models/character.dart';
+import 'package:flutter_application_4patrol/services/pdf_character_sheet_service.dart';
 
 /// Pressure test to verify that edits made to character weapons and equipment
 /// at any point in the generation process are properly persisted and reflected
