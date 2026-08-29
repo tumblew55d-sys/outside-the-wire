@@ -41,34 +41,33 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBx3tBiL-XgM14DcHfNdM6azTTRU5MrqC0',
-    appId: '1:203732910394:web:YOUR_WEB_APP_ID',
+    apiKey: 'AIzaSyBE9A6CLqG0kL-msyIhyHBe9owh_mYEfbU',
+    appId: '1:203732910394:web:18845c4fd695a97354d003',
     messagingSenderId: '203732910394',
     projectId: 'patrol-character-generator',
     authDomain: 'patrol-character-generator.firebaseapp.com',
     storageBucket: 'patrol-character-generator.firebasestorage.app',
+    measurementId: 'G-06BEY6WFQ0',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBx3tBiL-XgM14DcHfNdM6azTTRU5MrqC0',
-    appId: '1:203732910394:android:1bd6e9e17581656554d003',
+    appId: '1:203732910394:android:87e89a9a6ba51b9754d003',
     messagingSenderId: '203732910394',
     projectId: 'patrol-character-generator',
     storageBucket: 'patrol-character-generator.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBx3tBiL-XgM14DcHfNdM6azTTRU5MrqC0',
-    appId: '1:203732910394:ios:YOUR_IOS_APP_ID',
+    apiKey: 'AIzaSyCqr72b7nhV7zEcyBaKowmL1H0FqZRNfSc',
+    appId: '1:203732910394:ios:24f132c868fe544f54d003',
     messagingSenderId: '203732910394',
     projectId: 'patrol-character-generator',
     storageBucket: 'patrol-character-generator.firebasestorage.app',
     iosBundleId: 'com.example.flutterApplication4patrol',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBx3tBiL-XgM14DcHfNdM6azTTRU5MrqC0',
-    appId: '1:203732910394:ios:YOUR_IOS_APP_ID',
+    apiKey: 'AIzaSyCqr72b7nhV7zEcyBaKowmL1H0FqZRNfSc',
+    appId: '1:203732910394:ios:24f132c868fe544f54d003',
     messagingSenderId: '203732910394',
     projectId: 'patrol-character-generator',
     storageBucket: 'patrol-character-generator.firebasestorage.app',
@@ -76,11 +75,12 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBx3tBiL-XgM14DcHfNdM6azTTRU5MrqC0',
-    appId: '1:203732910394:web:YOUR_WEB_APP_ID',
+    apiKey: 'AIzaSyAgULLmczCnXUDmygA1R1Pkx-2YTJv_Znk',
+    appId: '1:203732910394:web:4ce7c92faef5c79c54d003',
     messagingSenderId: '203732910394',
     projectId: 'patrol-character-generator',
     authDomain: 'patrol-character-generator.firebaseapp.com',
     storageBucket: 'patrol-character-generator.firebasestorage.app',
+    measurementId: 'G-MDR8TGBM9N',
   );
 }
