@@ -1,0 +1,41 @@
+# Dependabot configuration for Flutter application
+# Automatically checks for dependency updates and security vulnerabilities
+
+version: 2
+updates:
+  # Monitor pub dependencies (Flutter/Dart packages)
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    # Group updates to reduce PR noise
+    groups:
+      firebase:
+        patterns:
+          - "firebase*"
+          - "cloud_firestore"
+      flutter:
+        patterns:
+          - "flutter*"
+      development:
+        dependency-type: "development"
+    # Limit open pull requests
+    open-pull-requests-limit: 5
+    # Add labels for easy filtering
+    labels:
+      - "dependencies"
+      - "security"
+    # Assign reviewers (optional - update with your GitHub username)
+    # reviewers:
+    #   - "tumblew55d-sys"
+    
+  # Monitor GitHub Actions (if you use CI/CD)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "github-actions"
