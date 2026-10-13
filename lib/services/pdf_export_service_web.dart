@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
 // Platform-specific implementation for dart:html (web)
 import 'dart:html' as html;
 

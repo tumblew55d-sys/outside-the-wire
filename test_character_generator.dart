@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 // QA Test Character Generator
 // Run with: dart run test_character_generator.dart
 

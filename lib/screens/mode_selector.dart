@@ -23,8 +23,8 @@ class ModeSelectorScreen extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.4),
-                Colors.black.withOpacity(0.7),
+                Colors.black.withValues(alpha: 0.4),
+                Colors.black.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -209,11 +209,11 @@ class _ModeButton extends StatelessWidget {
         width: 400,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: const Color(0xFF2B2B2B).withOpacity(0.9),
+          color: const Color(0xFF2B2B2B).withValues(alpha: 0.9),
           border: Border.all(color: const Color(0xFF4A5D3E), width: 2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -241,7 +241,7 @@ class _ModeButton extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: const Color(0xFFF7F3EE).withOpacity(0.7),
+                      color: const Color(0xFFF7F3EE).withValues(alpha: 0.7),
                       letterSpacing: 0.5,
                     ),
                   ),

@@ -384,7 +384,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2B2B2B).withOpacity(0.85),
+                color: const Color(0xFF2B2B2B).withValues(alpha: 0.85),
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(color: const Color(0xFF4A5D3E), width: 1),
               ),

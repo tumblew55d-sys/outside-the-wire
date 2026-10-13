@@ -311,7 +311,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    const Color(0xFF1A1A1A).withOpacity(0.6),
+                    const Color(0xFF1A1A1A).withValues(alpha: 0.6),
                   ],
                 ),
               ),
@@ -332,7 +332,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 letterSpacing: 1,
                 shadows: [
                   Shadow(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     offset: const Offset(1, 1),
                     blurRadius: 2,
                   ),
@@ -350,7 +350,7 @@ class _AuthScreenState extends State<AuthScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF2B2B2B).withOpacity(0.5),
+                color: const Color(0xFF2B2B2B).withValues(alpha: 0.5),
                 letterSpacing: 1,
               ),
             ),
@@ -375,7 +375,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           color: const Color(0xFF2B2B2B),
                           width: 3,
                         ),
-                        color: const Color(0xFFF7F3EE).withOpacity(0.9),
+                        color: const Color(0xFFF7F3EE).withValues(alpha: 0.9),
                       ),
                       child: Column(
                         children: [
@@ -411,7 +411,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF2B2B2B).withOpacity(0.7),
+                              color: const Color(0xFF2B2B2B).withValues(alpha: 0.7),
                               letterSpacing: 1,
                               fontStyle: FontStyle.italic,
                             ),

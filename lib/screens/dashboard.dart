@@ -601,7 +601,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 'Kazmo Studios',
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getBodyFontSize(context) - 2,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
               ),
             Expanded(
@@ -620,7 +620,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 'v Dec 2025',
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getBodyFontSize(context) - 4,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
               ),
           ],
@@ -645,7 +645,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     FirebaseAuth.instance.currentUser?.email ?? 'Guest',
                     style: TextStyle(
                       fontSize: ResponsiveUtils.getBodyFontSize(context) - 2,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 IconButton(

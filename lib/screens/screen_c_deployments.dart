@@ -319,6 +319,7 @@ class _DeploymentsScreenState extends State<DeploymentsScreen> {
       agentPromotion: _agentPromotion,
     );
   }
+
   Future<void> _saveDeployments() async {
     if (!_formKey.currentState!.validate()) return;
     if (_unusedSkillPoints > 0) {
@@ -699,14 +700,15 @@ class _DeploymentsScreenState extends State<DeploymentsScreen> {
                     setState(() {
                       if (roll <= 3) {
                         deployment.award = awards[0]; // None
-                      } else if (roll <= 6)
+                      } else if (roll <= 6) {
                         deployment.award = awards[1]; // Achievement
-                      else if (roll <= 8)
+                      } else if (roll <= 8) {
                         deployment.award = awards[2]; // Commendation +1
-                      else if (roll == 9)
+                      } else if (roll == 9) {
                         deployment.award = awards[3]; // Bronze Star +2
-                      else
+                      } else {
                         deployment.award = awards[4]; // Silver Star +3
+                      }
                     });
                   },
                 ),
@@ -786,14 +788,15 @@ class _DeploymentsScreenState extends State<DeploymentsScreen> {
 
                         if (roll <= 2) {
                           tempSchool = schools[0]; // Small Boats equivalent
-                        } else if (roll <= 4)
+                        } else if (roll <= 4) {
                           tempSchool = schools[1]; // Air Assault equivalent
-                        else if (roll <= 6)
+                        } else if (roll <= 6) {
                           tempSchool = schools[2]; // Airborne equivalent
-                        else if (roll <= 8)
+                        } else if (roll <= 8) {
                           tempSchool = schools[3]; // Breacher equivalent
-                        else
+                        } else {
                           tempSchool = schools[4]; // Ranger equivalent
+                        }
 
                         if (!_isSchoolDuplicate(tempSchool)) {
                           selectedSchool = tempSchool;
@@ -867,10 +870,11 @@ class _DeploymentsScreenState extends State<DeploymentsScreen> {
                     setState(() {
                       if (roll == 1) {
                         deployment.survival = 'Killed';
-                      } else if (roll <= 7)
+                      } else if (roll <= 7) {
                         deployment.survival = 'Survived unscathed';
-                      else
+                      } else {
                         deployment.survival = 'Wounded ($woundAward)';
+                      }
                     });
                   },
                 ),
