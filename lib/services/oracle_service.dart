@@ -258,7 +258,6 @@ class OracleService {
 
   /// Determine enemy stance
   String _determineStance(OracleCheck check, EnemyType enemyType) {
-    final stances = ['Passive', 'Alert', 'Aggressive'];
     final weights = enemyType.stanceWeights;
 
     // Modify weights based on local trust and activity

@@ -31,7 +31,7 @@ switch ($choice) {
         Write-Host "`n📱 Building Web Version..." -ForegroundColor Yellow
         flutter clean
         flutter pub get
-        flutter build web --release
+        flutter build web --release --pwa-strategy=none
         
         if ($LASTEXITCODE -eq 0) {
             Write-Host "`n✅ Web build successful!" -ForegroundColor Green

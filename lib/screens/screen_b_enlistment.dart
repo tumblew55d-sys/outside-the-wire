@@ -688,6 +688,7 @@ class _EnlistmentScreenState extends State<EnlistmentScreen> {
 
               // Military Specialty
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: _militarySpecialty,
                 decoration: const InputDecoration(
                   labelText: 'Military Specialty',
@@ -702,7 +703,14 @@ class _EnlistmentScreenState extends State<EnlistmentScreen> {
                   'Signals/Cyber Intel (Signals Intel 3, Small Arms 1, Communications 1)',
                   'Medical (First Aid 3, Small Arms 1)',
                   'Civil Affairs (Civil Affairs 3, Small Arms 1, First Aid 1)',
-                ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                ]
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(s, overflow: TextOverflow.ellipsis),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (v) {
                   setState(() {
                     _militarySpecialty = v;
@@ -918,13 +926,18 @@ class _EnlistmentScreenState extends State<EnlistmentScreen> {
                     'Attributes',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  Text(
-                    'Points remaining: $_remainingPoints',
-                    style: TextStyle(
-                      color: _remainingPoints > 0
-                          ? Colors.orange
-                          : Colors.green,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      'Points remaining: $_remainingPoints',
+                      textAlign: TextAlign.end,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: _remainingPoints > 0
+                            ? Colors.orange
+                            : Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],

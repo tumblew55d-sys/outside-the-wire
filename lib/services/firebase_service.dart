@@ -13,23 +13,45 @@ class FirebaseService {
     // Additional initialization logic (emulators, settings) can be added here.
   }
 
-  static Future<UserCredential> signInWithEmail(String email, String password) async {
-    return await auth.signInWithEmailAndPassword(email: email, password: password);
+  static Future<UserCredential> signInWithEmail(
+    String email,
+    String password,
+  ) async {
+    return await auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
-  static Future<UserCredential> signUpWithEmail(String email, String password) async {
-    return await auth.createUserWithEmailAndPassword(email: email, password: password);
+  static Future<UserCredential> signUpWithEmail(
+    String email,
+    String password,
+  ) async {
+    return await auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
   static Future<void> signOut() async {
     await auth.signOut();
   }
 
-  static Future<void> saveCharacterToCloud(String id, Map<String, dynamic> data) async {
-    await firestore.collection('characters').doc(id).set(data);
+  static Future<void> saveCharacterToCloud(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    // mergeFields replaces each top-level field but preserves cloud-only
+    // fields such as sharedGmIds (campaign sharing).
+    await firestore
+        .collection('characters')
+        .doc(id)
+        .set(data, SetOptions(mergeFields: data.keys.toList()));
   }
 
-  static Future<DocumentSnapshot<Map<String, dynamic>>> fetchCharacter(String id) async {
+  static Future<DocumentSnapshot<Map<String, dynamic>>> fetchCharacter(
+    String id,
+  ) async {
     return await firestore.collection('characters').doc(id).get();
   }
 
@@ -38,12 +60,12 @@ class FirebaseService {
     try {
       final user = auth.currentUser;
       if (user == null) return [];
-      
+
       final snapshot = await firestore
           .collection('characters')
           .where('userId', isEqualTo: user.uid)
           .get();
-      
+
       return snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
       print('Error fetching characters from Firebase: $e');

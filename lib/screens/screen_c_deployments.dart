@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/character.dart';
 import '../data/nationality_data.dart';
+import '../services/promotion_service.dart';
 import '../widgets/character_creation_layout.dart';
 import 'screen_b_enlistment.dart';
 import 'screen_c2_reenlistment.dart';
@@ -283,6 +284,14 @@ class _DeploymentsScreenState extends State<DeploymentsScreen> {
         break;
     }
 
+    final normalized = PromotionService.normalizeCareerPromotion(
+      officerPromotion: _officerPromotion,
+      sergeantPromotion: _sergeantPromotion,
+      rankType: (_character?.enlistment['rankType'] ?? 'Enlisted').toString(),
+    );
+    _officerPromotion = normalized.officer;
+    _sergeantPromotion = normalized.sergeant;
+
     // Initialize deployments
     _deployments.clear();
     for (int i = 0; i < _numDeployments; i++) {
@@ -299,94 +308,17 @@ class _DeploymentsScreenState extends State<DeploymentsScreen> {
 
   String _getPromotedRank() {
     if (_character == null) return '';
-
-    final currentRank = _character!.enlistment['rank'] ?? '';
-    final rankType =
-        _character!.enlistment['rankType']?.toString() ?? 'Enlisted';
-    final service = _character!.enlistment['service']?.toString() ?? 'Army';
-    final nationality = _character!.nationality;
-    final isOfficer = rankType == 'Officer';
-
-    // Get appropriate rank list based on service and rank type
-    List<String> ranks;
-    if (isOfficer) {
-      if (service == 'Navy') {
-        ranks = NationalityData.getNavyOfficerRanks(nationality)['ranks']!;
-      } else {
-        ranks = NationalityData.getOfficerRanks(nationality)['ranks']!;
-      }
-    } else {
-      if (service == 'Navy') {
-        ranks = NationalityData.getNavyEnlistedRanks(nationality)['ranks']!;
-      } else {
-        ranks = NationalityData.getEnlistedRanks(nationality)['ranks']!;
-      }
-    }
-
-    final currentIndex = ranks.indexOf(currentRank);
-    if (currentIndex == -1) return currentRank; // Rank not found in list
-
-    // Agent promotion takes highest precedence (E-6+)
-    if (_agentPromotion) {
-      if (isOfficer) {
-        // Promote officer by one rank (to O-2 if O-1, to O-3 if O-2, etc.)
-        if (currentIndex < ranks.length - 1) {
-          return ranks[currentIndex + 1];
-        }
-        return currentRank; // Already at highest rank
-      } else {
-        // Enlisted Agent promotion to E-6 (index 5) or higher
-        final targetIndex = currentIndex < 5 ? 5 : currentIndex + 1;
-        if (targetIndex < ranks.length) {
-          return ranks[targetIndex];
-        }
-        return ranks.length > 5 ? ranks[5] : currentRank;
-      }
-    }
-
-    // SOF promotion takes precedence (E-5+)
-    if (_sofPromotion) {
-      if (isOfficer) {
-        // Promote officer by one rank (to O-2 if O-1, to O-3 if O-2, etc.)
-        if (currentIndex < ranks.length - 1) {
-          return ranks[currentIndex + 1];
-        }
-        return currentRank; // Already at highest rank
-      } else {
-        // Enlisted SOF promotion to E-5 (index 4) or higher
-        final targetIndex = currentIndex < 4 ? 4 : currentIndex + 1;
-        if (targetIndex < ranks.length) {
-          return ranks[targetIndex];
-        }
-        return ranks.length > 4 ? ranks[4] : currentRank;
-      }
-    }
-
-    if (_officerPromotion && !isOfficer) {
-      // Battlefield commission to O-1 (first officer rank)
-      final officerRanks = service == 'Navy'
-          ? NationalityData.getNavyOfficerRanks(nationality)['ranks']!
-          : NationalityData.getOfficerRanks(nationality)['ranks']!;
-      return officerRanks.first;
-    } else if (_sergeantPromotion && isOfficer) {
-      // Officer promotion to O-2 (index 1: second officer rank)
-      if (currentIndex == 0 && ranks.length > 1) {
-        return ranks[1]; // O-1 to O-2
-      } else if (currentIndex > 0 && currentIndex < ranks.length - 1) {
-        return ranks[currentIndex + 1]; // Promote by one rank
-      }
-      return currentRank;
-    } else if (_sergeantPromotion) {
-      // Enlisted promotion to E-5 (index 4) or next rank if already E-5+
-      final targetIndex = currentIndex < 4 ? 4 : currentIndex + 1;
-      if (targetIndex < ranks.length) {
-        return ranks[targetIndex];
-      }
-      return ranks.length > 4 ? ranks[4] : currentRank;
-    }
-    return currentRank;
+    return PromotionService.promotedRank(
+      currentRank: (_character!.enlistment['rank'] ?? '').toString(),
+      rankType: (_character!.enlistment['rankType'] ?? 'Enlisted').toString(),
+      service: (_character!.enlistment['service'] ?? 'Army').toString(),
+      nationality: _character!.nationality,
+      officerPromotion: _officerPromotion,
+      sergeantPromotion: _sergeantPromotion,
+      sofPromotion: _sofPromotion,
+      agentPromotion: _agentPromotion,
+    );
   }
-
   Future<void> _saveDeployments() async {
     if (!_formKey.currentState!.validate()) return;
     if (_unusedSkillPoints > 0) {
@@ -434,6 +366,10 @@ class _DeploymentsScreenState extends State<DeploymentsScreen> {
           _sofPromotion ||
           _agentPromotion) {
         character.enlistment['rank'] = _getPromotedRank();
+        if (_officerPromotion) {
+          // Commissioned: later rounds must use the officer rank ladder
+          character.enlistment['rankType'] = 'Officer';
+        }
 
         if (_officerPromotion || _sergeantPromotion) {
           character.skills['Training'] =
@@ -568,8 +504,11 @@ class _DeploymentsScreenState extends State<DeploymentsScreen> {
 
         // Set promotion rank if earned during this career
         if ((_sergeantPromotion || _officerPromotion) && i == 0) {
-          // Promotion happens during first deployment
-          deployment.promotionRank = _getPromotedRank();
+          // Promotion happens during first deployment; skip if rank didn't change
+          final newRank = _getPromotedRank();
+          if (newRank != (_character?.enlistment['rank'] ?? '')) {
+            deployment.promotionRank = newRank;
+          }
         }
 
         // Set new specialty if gained after this deployment

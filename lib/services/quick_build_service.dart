@@ -415,7 +415,7 @@ class QuickBuildService {
     var attributes = _rollAttributes();
     // CRITICAL: Save base attributes BEFORE any bonuses
     final baseAttributes = Map<String, int>.from(attributes);
-    
+
     character.attributes = attributes;
 
     // Apply Ranger school bonuses
@@ -425,7 +425,7 @@ class QuickBuildService {
     var skills = _applySpecialtySkills(initialSpecialty, character.skills);
     // CRITICAL: Save base skills AFTER initial specialty but BEFORE Training bonus
     final baseSkills = Map<String, int>.from(skills);
-    
+
     skills['Training'] = (skills['Training'] ?? 0) + 1;
 
     // Find highest skill and add +1
@@ -557,7 +557,8 @@ class QuickBuildService {
     var skills = Map<String, int>.from(character.skills);
     skills['Spying'] = (skills['Spying'] ?? 0) + 3;
     skills['Civil Affairs'] = (skills['Civil Affairs'] ?? 0) + 1;
-    skills['Training'] = (skills['Training'] ?? 0) + 1; // Agent school adds Training +1
+    skills['Training'] =
+        (skills['Training'] ?? 0) + 1; // Agent school adds Training +1
 
     character.specialtyHook = _generateHook('Agent');
 
@@ -568,7 +569,7 @@ class QuickBuildService {
       ),
     );
     deployments.add(_generateAgentDeployment());
-    
+
     // Update Combat skill to reflect new deployment count
     skills['Combat'] = deployments.length;
     character.skills = skills;
@@ -578,11 +579,15 @@ class QuickBuildService {
     final equipment = _assignEquipment('Agent', false);
 
     // Preserve Training from SOF and add Agent bonus
-    final currentTraining = (character.enlistment['experience'] as Map?)?['Training'] ?? 1;
+    final currentTraining =
+        (character.enlistment['experience'] as Map?)?['Training'] ?? 1;
     character.enlistment = {
       ...character.enlistment,
       'specialty': 'Agent',
-      'experience': {'Combat': deployments.length, 'Training': currentTraining + 1},
+      'experience': {
+        'Combat': deployments.length,
+        'Training': currentTraining + 1,
+      },
       'deployments': deployments.map((d) => d.toJson()).toList(),
     };
 

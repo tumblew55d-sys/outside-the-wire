@@ -1,3 +1,4 @@
+import 'helpers/fake_path_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_4patrol/models/character.dart';
 import 'package:flutter_application_4patrol/services/pdf_character_sheet_service.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_application_4patrol/services/pdf_character_sheet_service
 /// Pressure test for inventory and equipment data persistence
 /// Tests the fixes for custom weapons and equipment not appearing in PDF
 void main() {
+  setUpAll(FakePathProvider.install);
   group('Inventory & Equipment Pressure Test', () {
     late Character testCharacter;
 

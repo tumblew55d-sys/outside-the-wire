@@ -6,8 +6,11 @@ service cloud.firestore {
     // Characters collection - users can only access their own characters
     match /characters/{characterId} {
       // Allow read if the character belongs to the requesting user
+      // GMs listed in sharedGmIds get read-only access (campaign sharing)
       allow read: if request.auth != null && 
-                     resource.data.userId == request.auth.uid;
+                     (resource.data.userId == request.auth.uid ||
+                      (resource.data.sharedGmIds is list &&
+                       request.auth.uid in resource.data.sharedGmIds));
       
       // Allow create if user is authenticated and sets their own userId
       allow create: if request.auth != null && 
@@ -16,8 +19,124 @@ service cloud.firestore {
       // Allow update/delete only if the character belongs to the user
       allow update, delete: if request.auth != null && 
                                resource.data.userId == request.auth.uid;
+      // A GM may only drop their own read access (player removed or campaign deleted)
+      allow update: if request.auth != null &&
+                       resource.data.sharedGmIds is list &&
+                       request.auth.uid in resource.data.sharedGmIds &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sharedGmIds']) &&
+                       !(request.auth.uid in request.resource.data.sharedGmIds) &&
+                       request.resource.data.sharedGmIds.toSet().difference(resource.data.sharedGmIds.toSet()).size() == 0;
     }
     
+    // Campaigns: GM-owned; players join with a code and share characters
+    match /campaigns/{campaignId} {
+      allow read: if request.auth != null &&
+                     (resource.data.gmId == request.auth.uid ||
+                      request.auth.uid in resource.data.memberIds);
+      allow create: if request.auth != null &&
+                       request.resource.data.gmId == request.auth.uid;
+      // GM edits anything; a player may only add/remove their own uid
+      allow update: if request.auth != null &&
+                       (resource.data.gmId == request.auth.uid ||
+                        (request.resource.data.diff(resource.data)
+                           .affectedKeys().hasOnly(['memberIds']) &&
+                         request.resource.data.memberIds
+                           .toSet().difference(resource.data.memberIds.toSet())
+                           .hasOnly([request.auth.uid]) &&
+                         resource.data.memberIds.toSet()
+                           .difference(request.resource.data.memberIds.toSet())
+                           .hasOnly([request.auth.uid])));
+      allow delete: if request.auth != null &&
+                       resource.data.gmId == request.auth.uid;
+
+      // Feed: chat posts, files and dice rolls. Never editable once posted.
+      match /feed/{postId} {
+        function campaign() {
+          return get(/databases/$(database)/documents/campaigns/$(campaignId)).data;
+        }
+        function isParticipant() {
+          return request.auth != null &&
+                 (campaign().gmId == request.auth.uid ||
+                  request.auth.uid in campaign().memberIds);
+        }
+        function validRoll(r) {
+          return (r.kind == '1d10' && r.dice.size() == 1 &&
+                  r.dice[0] is int && r.dice[0] >= 1 && r.dice[0] <= 10 &&
+                  r.total == r.dice[0]) ||
+                 (r.kind == '2d10' && r.dice.size() == 2 &&
+                  r.dice[0] is int && r.dice[0] >= 1 && r.dice[0] <= 10 &&
+                  r.dice[1] is int && r.dice[1] >= 1 && r.dice[1] <= 10 &&
+                  r.total == r.dice[0] + r.dice[1]);
+        }
+        function validPost(d) {
+          return d.authorId == request.auth.uid &&
+                 d.createdAt == request.time &&
+                 d.text is string && d.text.size() <= 500 &&
+                 d.authorName is string && d.authorName.size() <= 100 &&
+                 ((d.type == 'message' && d.text.size() > 0 &&
+                   d.keys().hasOnly(['type', 'authorId', 'authorName', 'text', 'createdAt'])) ||
+                  (d.type == 'roll' && validRoll(d.roll) &&
+                   d.keys().hasOnly(['type', 'authorId', 'authorName', 'text', 'createdAt', 'roll'])) ||
+                  (d.type == 'file' && d.fileUrl is string && d.fileName is string &&
+                   d.fileUrl.matches('https://firebasestorage\\.googleapis\\.com/.*') &&
+                   d.fileName.size() <= 100 &&
+                   d.contentType in ['image/png', 'image/jpeg', 'application/pdf'] &&
+                   d.storagePath.matches('campaign_files/' + campaignId + '/' + request.auth.uid + '/.*') &&
+                   d.keys().hasOnly(['type', 'authorId', 'authorName', 'text', 'createdAt',
+                                     'fileUrl', 'fileName', 'contentType', 'storagePath'])));
+        }
+        allow read: if isParticipant();
+        allow create: if isParticipant() && validPost(request.resource.data);
+        allow update: if false;
+        allow delete: if request.auth != null &&
+                         (resource.data.authorId == request.auth.uid ||
+                          campaign().gmId == request.auth.uid);
+      }
+      match /shared/{characterId} {
+        allow read: if request.auth != null &&
+          (get(/databases/$(database)/documents/campaigns/$(campaignId)).data.gmId == request.auth.uid ||
+           resource.data.ownerId == request.auth.uid ||
+           request.auth.uid in get(/databases/$(database)/documents/campaigns/$(campaignId)).data.memberIds);
+        function isParticipant() {
+          return request.auth != null &&
+            (get(/databases/$(database)/documents/campaigns/$(campaignId)).data.gmId == request.auth.uid ||
+             request.auth.uid in get(/databases/$(database)/documents/campaigns/$(campaignId)).data.memberIds);
+        }
+        function validFileEntry(d) {
+          return d.kind == 'file' &&
+                 d.keys().hasOnly(['kind', 'characterId', 'ownerId', 'ownerName', 'characterName',
+                                   'subtitle', 'fileName', 'contentType', 'fileUrl', 'storagePath', 'sharedAt']) &&
+                 d.storagePath.matches('campaign_files/' + campaignId + '/' + request.auth.uid + '/.*') &&
+                 d.contentType in ['image/png', 'image/jpeg', 'application/pdf'] &&
+                 d.fileUrl is string &&
+                 d.fileUrl.matches('https://firebasestorage\\.googleapis\\.com/.*') &&
+                 d.characterName is string && d.characterName.size() <= 100;
+        }
+        function ownsCharacter() {
+          return get(/databases/$(database)/documents/characters/$(characterId)).data.userId == request.auth.uid;
+        }
+        // Updates may only touch an entry you already own (no overwriting others).
+        allow create: if isParticipant() &&
+          request.resource.data.ownerId == request.auth.uid &&
+          (ownsCharacter() || validFileEntry(request.resource.data));
+        allow update: if isParticipant() &&
+          resource.data.ownerId == request.auth.uid &&
+          request.resource.data.ownerId == request.auth.uid &&
+          (ownsCharacter() || (resource.data.kind == 'file' && validFileEntry(request.resource.data)));        allow delete: if request.auth != null &&
+          (resource.data.ownerId == request.auth.uid ||
+           get(/databases/$(database)/documents/campaigns/$(campaignId)).data.gmId == request.auth.uid);
+      }
+    }
+
+    // Join-code lookup: get by exact code only (no listing)
+    match /campaignCodes/{code} {
+      allow get: if request.auth != null;
+      allow create: if request.auth != null &&
+                       request.resource.data.gmId == request.auth.uid;
+      allow delete: if request.auth != null &&
+                       resource.data.gmId == request.auth.uid;
+    }
+
     // Optional: If you want to allow users to share characters publicly
     // You could add a 'public' field and allow reads for public characters
     // Uncomment below to enable public character sharing:

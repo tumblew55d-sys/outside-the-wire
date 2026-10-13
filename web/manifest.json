@@ -3,7 +3,7 @@
     "short_name": "OTW CharGen",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#4A5D3E",
+    "background_color": "#11100D",
     "theme_color": "#4A5D3E",
     "description": "Create detailed military characters for tabletop RPGs with deployments, specialties, and equipment.",
     "orientation": "portrait-primary",

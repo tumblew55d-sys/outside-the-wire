@@ -649,8 +649,14 @@ class NationalityData {
         return {
           'ranks': [
             'Seaman Recruit (E-1)',
+            'Seaman Apprentice (E-2)',
+            'Seaman (E-3)',
             'Petty Officer 3rd Class (E-4)',
             'Petty Officer 2nd Class (E-5)',
+            'Petty Officer 1st Class (E-6)',
+            'Chief Petty Officer (E-7)',
+            'Senior Chief Petty Officer (E-8)',
+            'Master Chief Petty Officer (E-9)',
           ],
         };
     }
@@ -751,8 +757,11 @@ class NationalityData {
         return {
           'ranks': [
             'Ensign (O-1)',
+            'Lieutenant Junior Grade (O-2)',
             'Lieutenant (O-3)',
             'Lieutenant Commander (O-4)',
+            'Commander (O-5)',
+            'Captain (O-6)',
           ],
         };
     }
@@ -2621,8 +2630,6 @@ class NationalityData {
       'Steyr AUG A1 Rifle': 'Austrian bullpup rifle, 5.56mm NATO',
       'Steyr AUG A1 with M203 GL': 'AUG with 40mm grenade launcher',
       'IW Steyr Rifle': 'Individual Weapon Steyr, 5.56mm NATO variant',
-      'SR-98 Sniper Rifle': 'New Zealand sniper rifle, 7.62mm NATO',
-      'Browning HP Pistol': 'Browning Hi-Power, 9mm NATO classic pistol',
 
       // Panamanian weapons
       'M16A2 Rifle': 'US service rifle, 5.56mm NATO, 3-round burst',

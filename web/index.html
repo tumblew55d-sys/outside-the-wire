@@ -27,15 +27,22 @@
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Outside the Wire">
   <meta property="og:title" content="Outside the Wire Character Generator">
-  <meta property="og:description" content="Create detailed military characters for tabletop RPGs">
-  <meta property="og:image" content="icons/Icon-512.png">
+  <meta property="og:description" content="Create detailed military characters for tabletop RPGs with deployments, specialties, and equipment.">
+  <meta property="og:image" content="brand/outside-the-wire.jpg">
+  <meta property="og:image:alt" content="Outside the Wire logo">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="4500">
+  <meta property="og:image:height" content="1744">
+  <meta property="og:url" content="./">
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Outside the Wire Character Generator">
-  <meta name="twitter:description" content="Create detailed military characters for tabletop RPGs">
-  <meta name="twitter:image" content="icons/Icon-512.png">
+  <meta name="twitter:description" content="Create detailed military characters for tabletop RPGs with deployments, specialties, and equipment.">
+  <meta name="twitter:image" content="brand/outside-the-wire.jpg">
+  <meta name="twitter:image:alt" content="Outside the Wire logo">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -45,10 +52,29 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png"/>
 
   <title>Outside the Wire Character Generator - Military RPG Character Creator</title>
   <link rel="manifest" href="manifest.json">
+
+  <script>
+    // Drops stale service-worker caches when a new build is deployed (Hive/IndexedDB data is left alone).
+    (async function () {
+      try {
+        const res = await fetch('main.dart.js', { method: 'HEAD', cache: 'no-store' });
+        const id = res.headers.get('etag') || res.headers.get('last-modified');
+        if (!id) return;
+        const prev = localStorage.getItem('otw_build_id');
+        localStorage.setItem('otw_build_id', id);
+        if (prev && prev !== id) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+          for (const k of await caches.keys()) await caches.delete(k);
+          location.reload();
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

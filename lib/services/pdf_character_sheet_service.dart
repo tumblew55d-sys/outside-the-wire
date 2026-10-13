@@ -1,8 +1,11 @@
+
 import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../models/character.dart';
 import '../utils/body_type_descriptor.dart';
+import 'abilities_resolver.dart';
+import 'pdf_field_log_page.dart';
 import 'storage_service.dart';
 
 // Platform-specific file handling
@@ -13,7 +16,18 @@ import 'pdf_export_service_io.dart'
 /// matching the OTW field form design
 class PdfCharacterSheetService {
   static Future<String> exportCharacterSheet(Character character) async {
-    final pdf = pw.Document();
+    final pdf = buildDocument(character);
+    final fileName =
+        'OTW_CharSheet_${character.name.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+    final bytes = await pdf.save();
+    return _saveAndUpload(character, bytes, fileName);
+  }
+
+  static pw.Document buildDocument(
+    Character character, {
+    bool compress = true,
+  }) {
+    final pdf = pw.Document(compress: compress);
 
     pdf.addPage(
       pw.Page(
@@ -71,12 +85,20 @@ class PdfCharacterSheetService {
             ]),
             pw.SizedBox(height: 6),
 
-            // Core Attributes - Compact (Abilities are more important)
+            // Core Attributes - Compact
             _buildCompactAttributesRow(character.attributes),
             pw.SizedBox(height: 6),
 
+            _buildSection('III. SKILLS & QUALIFICATIONS', [
+              _buildSkillsCheckboxes(character.skills),
+            ]),
+            pw.SizedBox(height: 6),
+
+            _buildAbilitiesSectionLarge(character),
+            pw.SizedBox(height: 6),
+
             // Service Record Section
-            _buildSection('III. SERVICE RECORD', [
+            _buildSection('V. SERVICE RECORD', [
               _buildFieldRow([
                 _buildField(
                   'SERVICE BRANCH',
@@ -125,35 +147,6 @@ class PdfCharacterSheetService {
                 ),
               ]),
             ]),
-            pw.SizedBox(height: 8),
-
-            // CHARACTER NARRATIVE (First paragraph only) - Matches preview
-            if (_getFirstNarrativeParagraph(character).isNotEmpty)
-              _buildSection('CHARACTER NARRATIVE', [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(4),
-                  decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: PdfColors.grey400),
-                    color: PdfColors.grey50,
-                  ),
-                  child: pw.Text(
-                    _getFirstNarrativeParagraph(character),
-                    style: const pw.TextStyle(fontSize: 7, lineSpacing: 1.3),
-                    textAlign: pw.TextAlign.justify,
-                  ),
-                ),
-              ]),
-            pw.SizedBox(height: 6),
-
-            // IV. Skills & Qualifications Section - Matches preview
-            _buildSection('IV. SKILLS & QUALIFICATIONS', [
-              _buildSkillsCheckboxes(character.skills),
-            ]),
-            pw.SizedBox(height: 8),
-
-            // V. ABILITIES - PROMINENT SECTION - Matches preview
-            _buildAbilitiesSectionLarge(character),
-
             pw.Spacer(),
 
             // Footer
@@ -163,25 +156,23 @@ class PdfCharacterSheetService {
       ),
     );
 
-    // Add second page with full narrative and additional information
+    // Page 2: equipment checklist and full narrative
     final fullNarrative = character.enlistment['narrative']?.toString() ?? '';
-    if (fullNarrative.isNotEmpty) {
-      pdf.addPage(
-        pw.Page(
-          pageFormat: PdfPageFormat.letter,
-          margin: const pw.EdgeInsets.all(36),
-          build: (context) => pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              // Header
-              _buildHeader(character),
-              pw.SizedBox(height: 12),
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.letter,
+        margin: const pw.EdgeInsets.all(36),
+        build: (context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            _buildHeader(character),
+            pw.SizedBox(height: 12),
 
-              // VI. EQUIPMENT / LOADOUT CHECKLIST
-              _buildEquipmentSectionCheckboxes(character),
-              pw.SizedBox(height: 12),
+            // VI. EQUIPMENT / LOADOUT CHECKLIST
+            _buildEquipmentSectionCheckboxes(character),
+            pw.SizedBox(height: 12),
 
-              // Full Character Narrative
+            if (fullNarrative.isNotEmpty)
               _buildSection('CHARACTER NARRATIVE (FULL)', [
                 pw.Container(
                   padding: const pw.EdgeInsets.all(8),
@@ -196,42 +187,25 @@ class PdfCharacterSheetService {
                   ),
                 ),
               ]),
-              pw.SizedBox(height: 12),
 
-              // Notes Section
-              _buildSection('MISSION NOTES / CAMPAIGN LOG', [
-                pw.Container(
-                  height: 200,
-                  padding: const pw.EdgeInsets.all(8),
-                  decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: PdfColors.grey400),
-                    color: PdfColors.grey50,
-                  ),
-                  child: pw.Text(
-                    '(Use this space for mission notes, character development, injuries, etc.)',
-                    style: pw.TextStyle(
-                      fontSize: 7,
-                      color: PdfColors.grey600,
-                      fontStyle: pw.FontStyle.italic,
-                    ),
-                  ),
-                ),
-              ]),
+            pw.Spacer(),
 
-              pw.Spacer(),
-
-              // Footer
-              _buildFooter(),
-            ],
-          ),
+            _buildFooter(),
+          ],
         ),
-      );
-    }
+      ),
+    );
 
-    final fileName =
-        'OTW_CharSheet_${character.name.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
-    final bytes = await pdf.save();
+    pdf.addPage(PdfFieldLogPage.build(character));
 
+    return pdf;
+  }
+
+  static Future<String> _saveAndUpload(
+    Character character,
+    Uint8List bytes,
+    String fileName,
+  ) async {
     // Upload to Firebase Storage
     String? cloudUrl;
     try {
@@ -371,21 +345,6 @@ class PdfCharacterSheetService {
     return fullWidth ? widget : pw.Expanded(flex: flex, child: widget);
   }
 
-  /// Build attributes display
-  static pw.Widget _buildAttributesRow(Map<String, int> attributes) {
-    return pw.Row(
-      children: [
-        _buildAttributeBox('STR', attributes['Strength'] ?? 0),
-        pw.SizedBox(width: 12),
-        _buildAttributeBox('AGI', attributes['Agility'] ?? 0),
-        pw.SizedBox(width: 12),
-        _buildAttributeBox('WIS', attributes['Combat Wisdom'] ?? 0),
-        pw.SizedBox(width: 12),
-        _buildAttributeBox('KNOW', attributes['Combat Knowledge'] ?? 0),
-      ],
-    );
-  }
-
   /// Build compact attributes row (single line)
   static pw.Widget _buildCompactAttributesRow(Map<String, int> attributes) {
     return pw.Container(
@@ -422,30 +381,6 @@ class PdfCharacterSheetService {
     );
   }
 
-  /// Build a single attribute box
-  static pw.Widget _buildAttributeBox(String label, int value) {
-    return pw.Expanded(
-      child: pw.Container(
-        padding: const pw.EdgeInsets.all(8),
-        decoration: pw.BoxDecoration(
-          border: pw.Border.all(color: PdfColors.grey700),
-        ),
-        child: pw.Column(
-          children: [
-            pw.Text(
-              label,
-              style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              value.toString(),
-              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// Build skills checkboxes
   static pw.Widget _buildSkillsCheckboxes(Map<String, int> skills) {
@@ -511,115 +446,10 @@ class PdfCharacterSheetService {
     );
   }
 
-  /// Build abilities section
-  static pw.Widget _buildAbilitiesSection(Character character) {
-    // Try to get abilities from character data, calculate if missing
-    var abilities = character.enlistment['abilities'] as Map<String, dynamic>?;
-    
-    if (abilities == null || abilities.isEmpty) {
-      debugPrint('⚠️ Abilities missing from character data - calculating on-the-fly');
-      abilities = _calculateAbilities(character);
-    }
-    
-    // Ensure abilities is non-null for the widget tree
-    final nonNullAbilities = abilities ?? <String, dynamic>{};
-
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        _buildAbilityCategory('PROWESS', [
-          'Small Arms',
-          'Heavy Weapons',
-          'Fires',
-        ], nonNullAbilities),
-        pw.SizedBox(height: 8),
-        _buildAbilityCategory('INSTINCT', [
-          'First Aid',
-          'Communication',
-          'Civil Affairs',
-        ], nonNullAbilities),
-        pw.SizedBox(height: 8),
-        _buildAbilityCategory('TACTICS', [
-          'Spying',
-          'Explosives',
-          'Signals Intel',
-        ], nonNullAbilities),
-      ],
-    );
-  }
-
-  /// Calculate abilities on-the-fly if missing from character data
-  /// This is a fallback for older characters or edge cases
-  static Map<String, dynamic> _calculateAbilities(Character character) {
-    final a = character.attributes;
-    final s = character.skills;
-    
-    int val(Map<String, int> map, String key) => map[key] ?? 0;
-    int penalize(int base, bool earned) => earned ? base : (base ~/ 2);
-    
-    // Core abilities (never halved)
-    final specialty = character.enlistment['specialty']?.toString() ?? '';
-    var tacticsBase = val(a, 'Combat Knowledge') + val(s, 'Combat') + val(s, 'Training');
-    if (specialty.contains('Rifleman')) {
-      tacticsBase += 1;
-    }
-    
-    return {
-      'Prowess': val(a, 'Strength') + val(s, 'Combat') + val(s, 'Training'),
-      'Instincts': val(a, 'Combat Wisdom') + val(s, 'Training') + val(s, 'Combat'),
-      'Tactics': tacticsBase,
-      'Small Arms': penalize(
-        val(s, 'Small Arms') + val(a, 'Agility') + val(s, 'Combat'),
-        val(s, 'Small Arms') > 0,
-      ),
-      'Heavy Weapons': penalize(
-        val(s, 'Heavy Weapons') + val(a, 'Agility') + val(s, 'Combat'),
-        val(s, 'Heavy Weapons') > 0,
-      ),
-      'First Aid': penalize(
-        val(s, 'First Aid') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
-        val(s, 'First Aid') > 0,
-      ),
-      'Communication': penalize(
-        val(s, 'Radio Ops') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
-        val(s, 'Radio Ops') > 0,
-      ),
-      'Civil Affairs': penalize(
-        val(s, 'Civil Affairs') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
-        val(s, 'Civil Affairs') > 0,
-      ),
-      'Fires': penalize(
-        val(s, 'Fires') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
-        val(s, 'Fires') > 0,
-      ),
-      'Spying': penalize(
-        val(s, 'Spying') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
-        val(s, 'Spying') > 0,
-      ),
-      'Explosives': penalize(
-        val(s, 'Explosives') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
-        val(s, 'Explosives') > 0,
-      ),
-      'Signals Intel': penalize(
-        val(s, 'Signals Intel') + val(s, 'Combat') + val(a, 'Combat Wisdom'),
-        val(s, 'Signals Intel') > 0,
-      ),
-    };
-  }
-
   /// Build LARGE prominent abilities section (Most Important)
   static pw.Widget _buildAbilitiesSectionLarge(Character character) {
-    // Try to get abilities from character data, calculate if missing
-    var abilities = character.enlistment['abilities'] as Map<String, dynamic>?;
-    
-    if (abilities == null || abilities.isEmpty) {
-      debugPrint('⚠️ Abilities missing from character data - calculating on-the-fly');
-      abilities = _calculateAbilities(character);
-    }
-    
-    // Ensure abilities is non-null for the widget tree
-    final nonNullAbilities = abilities ?? <String, dynamic>{};
-    
+    final nonNullAbilities = AbilitiesResolver.resolve(character);
+
     final abilityGroups = {
       'Prowess': ['Small Arms', 'Heavy Weapons', 'First Aid'],
       'Instincts': ['Communication', 'Civil Affairs', 'Fires'],
@@ -636,7 +466,7 @@ class PdfCharacterSheetService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'V. ABILITIES',
+            'IV. ABILITIES',
             style: pw.TextStyle(
               fontSize: 11,
               fontWeight: pw.FontWeight.bold,
@@ -685,124 +515,6 @@ class PdfCharacterSheetService {
           ),
         ],
       ),
-    );
-  }
-
-  /// Build ability category row
-  static pw.Widget _buildAbilityCategory(
-    String category,
-    List<String> skillNames,
-    Map<String, dynamic> abilities,
-  ) {
-    return pw.Row(
-      children: [
-        pw.Container(
-          width: 80,
-          child: pw.Text(
-            category,
-            style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
-          ),
-        ),
-        pw.Expanded(
-          child: pw.Row(
-            children: skillNames.map((skill) {
-              final value = abilities[skill] ?? 0;
-              return pw.Expanded(
-                child: pw.Container(
-                  margin: const pw.EdgeInsets.only(right: 8),
-                  padding: const pw.EdgeInsets.all(4),
-                  decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: PdfColors.grey600),
-                  ),
-                  child: pw.Column(
-                    children: [
-                      pw.Text(skill, style: const pw.TextStyle(fontSize: 7)),
-                      pw.Text(
-                        value.toString(),
-                        style: pw.TextStyle(
-                          fontSize: 10,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Build equipment section
-  static pw.Widget _buildEquipmentSection(Character character) {
-    final inventory = character.inventory;
-    final loadoutWeapons = (inventory['loadoutWeapons'] as List?) ?? [];
-    final equipment = (inventory['selectedEquipment'] as List?) ?? [];
-
-    // Organize equipment into categories
-    final headEyes = <String>[];
-    final clothing = <String>[];
-    final loadBearing = <String>[];
-    final weapons = <String>[...loadoutWeapons.cast<String>()];
-    final grenades = <String>[];
-    final comms = <String>[];
-    final tools = <String>[];
-    final pack = <String>[];
-
-    for (var item in equipment.cast<String>()) {
-      final itemLower = item.toLowerCase();
-      if (itemLower.contains('helmet') ||
-          itemLower.contains('nvg') ||
-          itemLower.contains('gas mask') ||
-          itemLower.contains('eye')) {
-        headEyes.add(item);
-      } else if (itemLower.contains('uniform') ||
-          itemLower.contains('boots') ||
-          itemLower.contains('gloves') ||
-          itemLower.contains('jacket')) {
-        clothing.add(item);
-      } else if (itemLower.contains('vest') ||
-          itemLower.contains('magazine') ||
-          itemLower.contains('plate') ||
-          itemLower.contains('pouch')) {
-        loadBearing.add(item);
-      } else if (itemLower.contains('grenade') ||
-          itemLower.contains('explosive') ||
-          itemLower.contains('smoke') ||
-          itemLower.contains('flash')) {
-        grenades.add(item);
-      } else if (itemLower.contains('radio') ||
-          itemLower.contains('jtac') ||
-          itemLower.contains('jammer')) {
-        comms.add(item);
-      } else if (itemLower.contains('pack') ||
-          itemLower.contains('ruck') ||
-          itemLower.contains('camelback') ||
-          itemLower.contains('meal')) {
-        pack.add(item);
-      } else {
-        tools.add(item);
-      }
-    }
-
-    return pw.Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        if (headEyes.isNotEmpty) _buildEquipmentCategory('HEAD/EYES', headEyes),
-        if (clothing.isNotEmpty) _buildEquipmentCategory('CLOTHING', clothing),
-        if (loadBearing.isNotEmpty)
-          _buildEquipmentCategory('LOAD BEARING/VEST', loadBearing),
-        if (weapons.isNotEmpty) _buildEquipmentCategory('WEAPONS', weapons),
-        if (grenades.isNotEmpty)
-          _buildEquipmentCategory('GRENADES/EXPLOSIVES', grenades),
-        if (comms.isNotEmpty) _buildEquipmentCategory('COMMUNICATIONS', comms),
-        if (tools.isNotEmpty)
-          _buildEquipmentCategory('TOOLS/ACCESSORIES', tools),
-        if (pack.isNotEmpty) _buildEquipmentCategory('DAYPACK/RUCKSACK', pack),
-      ],
     );
   }
 
@@ -1002,17 +714,18 @@ class PdfCharacterSheetService {
                     runSpacing: 3,
                     children: category.value.map((item) {
                       // Check if item is in selectedEquipment (case-insensitive partial match)
-                      final isSelected = selectedEquipment.any((selectedItem) =>
-                          selectedItem.toString().toLowerCase() ==
-                              item.toLowerCase() ||
-                          selectedItem
-                              .toString()
-                              .toLowerCase()
-                              .contains(item.toLowerCase()) ||
-                          item
-                              .toLowerCase()
-                              .contains(selectedItem.toString().toLowerCase()));
-                      
+                      final isSelected = selectedEquipment.any(
+                        (selectedItem) =>
+                            selectedItem.toString().toLowerCase() ==
+                                item.toLowerCase() ||
+                            selectedItem.toString().toLowerCase().contains(
+                              item.toLowerCase(),
+                            ) ||
+                            item.toLowerCase().contains(
+                              selectedItem.toString().toLowerCase(),
+                            ),
+                      );
+
                       return pw.Row(
                         mainAxisSize: pw.MainAxisSize.min,
                         children: [
@@ -1111,66 +824,6 @@ class PdfCharacterSheetService {
     );
   }
 
-  /// Build equipment category
-  static pw.Widget _buildEquipmentCategory(String title, List<String> items) {
-    return pw.Container(
-      width: 180,
-      padding: const pw.EdgeInsets.all(6),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey700),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(
-            title,
-            style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 3),
-          if (items.isEmpty)
-            pw.Text('—', style: const pw.TextStyle(fontSize: 7))
-          else
-            ...items.map((item) {
-              return pw.Padding(
-                padding: const pw.EdgeInsets.only(bottom: 2),
-                child: pw.Row(
-                  children: [
-                    pw.Container(
-                      width: 7,
-                      height: 7,
-                      decoration: pw.BoxDecoration(
-                        border: pw.Border.all(
-                          color: PdfColors.grey700,
-                          width: 0.5,
-                        ),
-                      ),
-                      child: pw.Center(
-                        child: pw.Text(
-                          '✓',
-                          style: pw.TextStyle(
-                            fontSize: 5,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    pw.SizedBox(width: 3),
-                    pw.Expanded(
-                      child: pw.Text(
-                        item,
-                        style: const pw.TextStyle(fontSize: 6),
-                        maxLines: 2,
-                        overflow: pw.TextOverflow.clip,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-        ],
-      ),
-    );
-  }
 
   /// Build footer
   static pw.Widget _buildFooter() {
@@ -1256,20 +909,5 @@ class PdfCharacterSheetService {
       'Other': 'Other',
     };
     return mapping[skillName] ?? skillName;
-  }
-
-  static String _getFirstNarrativeParagraph(Character character) {
-    final narrative = character.enlistment['narrative']?.toString() ?? '';
-    if (narrative.isEmpty) return '';
-
-    // Split by double newlines (paragraphs) or single newlines if no doubles exist
-    final paragraphs = narrative.contains('\n\n')
-        ? narrative.split('\n\n')
-        : narrative.split('\n');
-
-    // Return first non-empty paragraph
-    return paragraphs
-        .firstWhere((p) => p.trim().isNotEmpty, orElse: () => '')
-        .trim();
   }
 }

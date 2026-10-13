@@ -23,9 +23,24 @@ service firebase.storage {
       allow write, delete: if request.auth != null;
     }
     
-    // Deny all other requests by default
+    // Campaign feed uploads: images/PDFs up to 5 MB. Membership is enforced
+    // by the Firestore feed rules; files are only reachable via their post.
+    match /campaign_files/{campaignId}/{uploaderId}/{filename} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null &&
+                       uploaderId == request.auth.uid &&
+                       request.resource.size > 0 &&
+                       request.resource.size <= 5 * 1024 * 1024 &&
+                       request.resource.contentType in ['image/png', 'image/jpeg', 'application/pdf'];
+      // The uploader stamps the campaign GM's uid into metadata so the GM can remove mistakes.
+      allow delete: if request.auth != null &&
+                       (uploaderId == request.auth.uid ||
+                        resource.metadata.gmId == request.auth.uid);
+    }    // Deny all other requests by default
     match /{allPaths=**} {
       allow read, write: if false;
     }
   }
 }
+
+// v2

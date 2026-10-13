@@ -84,8 +84,13 @@ class StorageService {
       if (image == null) return null;
 
       // Sanitize equipment name for file path
-      final sanitizedName = equipmentName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
-      final storageRef = _storage.ref().child('equipment/$characterId/$sanitizedName.jpg');
+      final sanitizedName = equipmentName.replaceAll(
+        RegExp(r'[^a-zA-Z0-9]'),
+        '_',
+      );
+      final storageRef = _storage.ref().child(
+        'equipment/$characterId/$sanitizedName.jpg',
+      );
 
       final Uint8List imageData = await image.readAsBytes();
       final uploadTask = await storageRef.putData(
@@ -110,11 +115,16 @@ class StorageService {
   ) async {
     try {
       // Sanitize character name for filename
-      final sanitizedName = characterName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+      final sanitizedName = characterName.replaceAll(
+        RegExp(r'[^a-zA-Z0-9]'),
+        '_',
+      );
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final filename = '${sanitizedName}_$timestamp.pdf';
 
-      final storageRef = _storage.ref().child('character_sheets/$characterId/$filename');
+      final storageRef = _storage.ref().child(
+        'character_sheets/$characterId/$filename',
+      );
 
       final uploadTask = await storageRef.putData(
         pdfData,
@@ -147,8 +157,13 @@ class StorageService {
     String equipmentName,
   ) async {
     try {
-      final sanitizedName = equipmentName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
-      final storageRef = _storage.ref().child('equipment/$characterId/$sanitizedName.jpg');
+      final sanitizedName = equipmentName.replaceAll(
+        RegExp(r'[^a-zA-Z0-9]'),
+        '_',
+      );
+      final storageRef = _storage.ref().child(
+        'equipment/$characterId/$sanitizedName.jpg',
+      );
       await storageRef.delete();
       return true;
     } catch (e) {
@@ -162,13 +177,13 @@ class StorageService {
     try {
       final storageRef = _storage.ref().child('character_sheets/$characterId');
       final listResult = await storageRef.listAll();
-      
+
       final urls = <String>[];
       for (var item in listResult.items) {
         final url = await item.getDownloadURL();
         urls.add(url);
       }
-      
+
       return urls;
     } catch (e) {
       print('Error getting PDF URLs: $e');
@@ -177,7 +192,9 @@ class StorageService {
   }
 
   /// Show image source selection dialog (Gallery or Camera)
-  static Future<ImageSource?> showImageSourceDialog(BuildContext context) async {
+  static Future<ImageSource?> showImageSourceDialog(
+    BuildContext context,
+  ) async {
     return showDialog<ImageSource>(
       context: context,
       builder: (context) => AlertDialog(

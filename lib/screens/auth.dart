@@ -181,7 +181,7 @@ class _AuthScreenState extends State<AuthScreen> {
       await _saveCredentials();
       await _syncFirebaseCharacters();
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/dashboard');
+        Navigator.of(context).pushReplacementNamed('/');
       }
     } catch (e) {
       if (mounted) {
@@ -241,7 +241,7 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       await FirebaseService.signUpWithEmail(email, password);
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/dashboard');
+        Navigator.of(context).pushReplacementNamed('/');
       }
     } catch (e) {
       if (mounted) {
@@ -527,7 +527,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             TextButton(
                               onPressed: () => Navigator.of(
                                 context,
-                              ).pushReplacementNamed('/dashboard'),
+                              ).pushReplacementNamed('/'),
                               child: const Text(
                                 'Continue as Guest',
                                 style: TextStyle(color: Color(0xFF6B6B6B)),

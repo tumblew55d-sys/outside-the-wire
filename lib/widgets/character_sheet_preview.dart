@@ -6,11 +6,13 @@ import '../utils/body_type_descriptor.dart';
 class CharacterSheetPreview extends StatefulWidget {
   final Character character;
   final Function(String item, bool isChecked)? onEquipmentChanged;
+  final bool readOnly;
 
   const CharacterSheetPreview({
     super.key,
     required this.character,
     this.onEquipmentChanged,
+    this.readOnly = false,
   });
 
   @override
@@ -405,17 +407,6 @@ class _CharacterSheetPreviewState extends State<CharacterSheetPreview> {
     return Expanded(flex: flex, child: widget);
   }
 
-  Widget _buildAttributesRow(Map<String, dynamic> attributes) {
-    return Row(
-      children: [
-        _buildAttributeBox('STR', attributes['Strength']),
-        _buildAttributeBox('AGI', attributes['Agility']),
-        _buildAttributeBox('WIS', attributes['Combat Wisdom']),
-        _buildAttributeBox('KNOW', attributes['Combat Knowledge']),
-      ],
-    );
-  }
-
   Widget _buildCompactAttribute(String label, int value) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -431,36 +422,6 @@ class _CharacterSheetPreviewState extends State<CharacterSheetPreview> {
     );
   }
 
-  Widget _buildAttributeBox(String label, dynamic value) {
-    final displayValue = value?.toString() ?? '—';
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.only(right: 4),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400, width: 2),
-          color: value == null ? Colors.grey.shade50 : Colors.white,
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              displayValue,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: value == null ? Colors.grey.shade400 : Colors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildSkillsGrid(Map<String, dynamic> skills) {
     final skillsList = [
@@ -584,59 +545,6 @@ class _CharacterSheetPreviewState extends State<CharacterSheetPreview> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildAbilitiesGrid(Character character) {
-    // Keep old method for compatibility
-    final abilities = character.enlistment['abilities'] as Map? ?? {};
-    final abilityGroups = {
-      'Prowess': ['Small Arms', 'Heavy Weapons', 'First Aid'],
-      'Instincts': ['Communication', 'Civil Affairs', 'Fires'],
-      'Tactics': ['Spying', 'Explosives', 'Signals Intel'],
-    };
-
-    return Column(
-      children: abilityGroups.entries.map((group) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            children: [
-              Container(
-                width: 80,
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  color: Colors.grey.shade200,
-                ),
-                child: Text(
-                  '${group.key}: ${abilities[group.key] ?? '—'}',
-                  style: const TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Wrap(
-                  spacing: 4,
-                  children: group.value.map((skill) {
-                    final value = abilities[skill] ?? 0;
-                    return Text(
-                      '$skill: $value',
-                      style: TextStyle(
-                        fontSize: 7,
-                        color: value > 0 ? Colors.black : Colors.grey.shade400,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
     );
   }
 
@@ -833,7 +741,7 @@ class _CharacterSheetPreviewState extends State<CharacterSheetPreview> {
                     children: category.value.map((item) {
                       final isChecked = _equipmentChecked[item] ?? false;
                       return InkWell(
-                        onTap: () {
+                        onTap: widget.readOnly ? null : () {
                           setState(() {
                             _equipmentChecked[item] = !isChecked;
                           });
@@ -922,35 +830,6 @@ class _CharacterSheetPreviewState extends State<CharacterSheetPreview> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildEquipmentPreview(Character character) {
-    // Keep old method for compatibility
-    final inventory = character.inventory;
-    final weapons = (inventory['loadoutWeapons'] as List?) ?? [];
-    final equipment = (inventory['selectedEquipment'] as List?) ?? [];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (weapons.isNotEmpty) ...[
-          Text(
-            'WEAPONS: ${weapons.join(', ')}',
-            style: const TextStyle(fontSize: 7),
-          ),
-          const SizedBox(height: 4),
-        ],
-        if (equipment.isNotEmpty)
-          Text(
-            'EQUIPMENT: ${equipment.take(5).join(', ')}${equipment.length > 5 ? '...' : ''}',
-            style: const TextStyle(fontSize: 7),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        if (weapons.isEmpty && equipment.isEmpty)
-          Text('—', style: TextStyle(fontSize: 7, color: Colors.grey.shade400)),
-      ],
     );
   }
 

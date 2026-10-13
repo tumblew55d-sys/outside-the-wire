@@ -391,6 +391,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       );
     } else if (choice == 'enlistment') {
+      if (hasEnlistment) {
+        final proceed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Redo Enlistment?'),
+            content: const Text(
+              'This restarts the enlistment process and regenerates attributes, '
+              'skills, deployments and gear. To change details like weapons, '
+              'equipment, abilities or deployments, cancel and choose that '
+              'section instead.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Restart Enlistment'),
+              ),
+            ],
+          ),
+        );
+        if (proceed != true || !mounted) {
+          _loadCharacters();
+          return;
+        }
+      }
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -739,123 +767,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         _selectedCharacter = c;
                                       });
                                     },
-                                    onDoubleTap: () async {
-                                      // Double-click to open edit menu
-                                      final choice = await showDialog<String>(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: Text(c.name),
-                                          content: const Text(
-                                            'Edit character:',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                context,
-                                                'basic_info',
-                                              ),
-                                              child: const Text('Basic Info'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                context,
-                                                'enlistment',
-                                              ),
-                                              child: const Text('Enlistment'),
-                                            ),
-                                            TextButton(
-                                              onPressed: hasEnlistment
-                                                  ? () => Navigator.pop(
-                                                      context,
-                                                      'deployments',
-                                                    )
-                                                  : null,
-                                              child: const Text('Deployments'),
-                                            ),
-                                            TextButton(
-                                              onPressed: hasEnlistment
-                                                  ? () => Navigator.pop(
-                                                      context,
-                                                      'abilities',
-                                                    )
-                                                  : null,
-                                              child: const Text(
-                                                'Abilities & Narrative',
-                                              ),
-                                            ),
-                                            TextButton(
-                                              onPressed: hasEnlistment
-                                                  ? () => Navigator.pop(
-                                                      context,
-                                                      'inventory',
-                                                    )
-                                                  : null,
-                                              child: const Text(
-                                                'Inventory & Equipment',
-                                              ),
-                                            ),
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
-                                              child: const Text('Cancel'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-
-                                      if (choice == 'basic_info') {
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                BasicInfoEditScreen(
-                                                  characterId: c.id,
-                                                ),
-                                          ),
-                                        );
-                                      } else if (choice == 'enlistment') {
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                EnlistmentScreen(
-                                                  characterId: c.id,
-                                                ),
-                                          ),
-                                        );
-                                      } else if (choice == 'deployments') {
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                DeploymentsScreen(
-                                                  characterId: c.id,
-                                                ),
-                                          ),
-                                        );
-                                      } else if (choice == 'abilities') {
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                AbilitiesNarrativeScreen(
-                                                  characterId: c.id,
-                                                ),
-                                          ),
-                                        );
-                                      } else if (choice == 'inventory') {
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                InventoryEquipmentScreen(
-                                                  characterId: c.id,
-                                                ),
-                                          ),
-                                        );
-                                      }
-                                      _loadCharacters();
-                                    },
+                                    onDoubleTap: () => _showCharacterEditMenu(c, hasEnlistment),
                                     child: Card(
                                       margin: const EdgeInsets.symmetric(
                                         vertical: 8,
@@ -888,17 +800,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 ),
                                               );
                                             } else if (value == 'edit') {
-                                              // Navigate to enlistment screen for editing
-                                              await Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      EnlistmentScreen(
-                                                        characterId: c.id,
-                                                      ),
-                                                ),
-                                              );
-                                              _loadCharacters();
+                                              await _showCharacterEditMenu(c, hasEnlistment);
                                             } else if (value == 'export') {
                                               // Export to PDF
                                               try {

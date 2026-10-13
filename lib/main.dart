@@ -16,6 +16,7 @@ import 'screens/screen_e_inventory.dart';
 import 'screens/screen_f_appearance.dart';
 import 'screens/character_create.dart';
 import 'screens/auth.dart';
+import 'screens/campaigns_screen.dart';
 import 'screens/mode_selector.dart';
 import 'services/firebase_service.dart';
 
@@ -138,6 +139,7 @@ class PatrolApp extends StatelessWidget {
       routes: {
         '/': (context) => const ModeSelectorScreen(),
         '/auth': (context) => const AuthScreen(),
+        '/campaigns': (context) => const CampaignsScreen(),
         '/dashboard': (context) => DashboardScreen(sampleRoster: roster),
         '/basicInfo': (context) => const BasicInfoScreen(),
         '/createCharacter': (context) => const CharacterCreateScreen(),

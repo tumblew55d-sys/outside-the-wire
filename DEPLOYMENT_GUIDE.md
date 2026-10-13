@@ -43,6 +43,14 @@ Select:
 - Single-page app: `Yes`
 - Automatic builds with GitHub: `No` (for now)
 
+The existing `patrol-character-generator` Hosting site is already provisioned, so its current manual deployments need no change. For automated provisioning of a **new** Firebase project after October 15, 2026, create the Hosting site before its first deploy:
+
+```bash
+firebase hosting:sites:create <site-id> --project=<project-id>
+```
+
+The project ID can usually be used as the site ID. If that ID is unavailable, choose a unique site ID and configure the deployment to target it.
+
 #### Step 3: Build Web Version
 ```powershell
 flutter build web --release

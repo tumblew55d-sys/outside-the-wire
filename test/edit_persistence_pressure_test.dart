@@ -1,3 +1,4 @@
+import 'helpers/fake_path_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:io';
@@ -11,6 +12,7 @@ import 'package:flutter_application_4patrol/services/pdf_character_sheet_service
 /// This test addresses user feedback that changes made on the player character
 /// sheet are not being saved with the PDF, specifically for weapon and equipment edits.
 void main() {
+  setUpAll(FakePathProvider.install);
   group('Edit Persistence Pressure Test', () {
     late Box characterBox;
 

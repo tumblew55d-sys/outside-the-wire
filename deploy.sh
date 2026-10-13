@@ -43,7 +43,7 @@ case $choice in
         echo -e "${YELLOW}📱 Building Web Version...${NC}"
         flutter clean
         flutter pub get
-        flutter build web --release
+        flutter build web --release --pwa-strategy=none
         
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}✅ Web build successful!${NC}"

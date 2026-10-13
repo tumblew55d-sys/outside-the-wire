@@ -570,14 +570,31 @@ class _CharacterCreateScreenState extends State<CharacterCreateScreen> {
       // Apply promotions from career roll
       final String rank;
       if (specialty == 'SOF' || specialty == 'Agent') {
-        // SOF/Agent always enlisted, higher rank required (E-6)
-        final allEnlistedRanks = NationalityData.getEnlistedRanks(
-          _nationality!,
-        )['ranks']!;
-        final rankIndex = allEnlistedRanks.length > 5
-            ? 5
-            : allEnlistedRanks.length - 1;
-        rank = allEnlistedRanks[rankIndex];
+        if (_selectedRankType == 'Officer') {
+          // SOF/Agent officers stay on the officer progression and advance one grade.
+          final officerRanks = NationalityData.getInitialOfficerRanks(
+            _nationality!,
+          )['ranks']!;
+          final currentOfficerRank = numDeployments > 0 && officerRanks.length > 1
+              ? officerRanks[1 + random.nextInt(officerRanks.length - 1)]
+              : officerRanks.first;
+          final fullOfficerRanks = NationalityData.getOfficerRanks(
+            _nationality!,
+          )['ranks']!;
+          final currentIndex = fullOfficerRanks.indexOf(currentOfficerRank);
+          rank = currentIndex >= 0 && currentIndex < fullOfficerRanks.length - 1
+              ? fullOfficerRanks[currentIndex + 1]
+              : currentOfficerRank;
+        } else {
+          // Enlisted SOF/Agent requires E-6 (or the highest available rank).
+          final allEnlistedRanks = NationalityData.getEnlistedRanks(
+            _nationality!,
+          )['ranks']!;
+          final rankIndex = allEnlistedRanks.length > 5
+              ? 5
+              : allEnlistedRanks.length - 1;
+          rank = allEnlistedRanks[rankIndex];
+        }
       } else if (officerPromotion || _selectedRankType == 'Officer') {
         // Officer promotion or officer start
         final allOfficerRanks = NationalityData.getOfficerRanks(
@@ -1639,16 +1656,6 @@ class _CharacterCreateScreenState extends State<CharacterCreateScreen> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-  }
-
-  void _autoGenerateCharacter() {
-    // This function is deprecated - use _autoGenerateCompleteCharacter instead
-    // Keeping for backwards compatibility but showing selection UI
-    setState(() {
-      _showAutoGenerateOptions = true;
-    });
-
-    setState(() {});
   }
 
   @override

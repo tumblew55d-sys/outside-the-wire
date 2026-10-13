@@ -17,8 +17,14 @@ firebase init hosting
 # - Configure as single-page app: Yes
 # - Set up automatic builds: No
 
+# The existing patrol-character-generator Hosting site is already provisioned;
+# current manual deployments need no change. For a new project provisioned by
+# an automated pipeline after October 15, 2026, create its site before first deploy:
+firebase hosting:sites:create <site-id> --project=<project-id>
+# The project ID is usually a suitable site ID; use a unique ID if already reserved.
+
 # 3. Build your Flutter app
-flutter build web --release
+flutter build web --release --pwa-strategy=none
 
 # 4. Deploy to Firebase
 firebase deploy --only hosting
